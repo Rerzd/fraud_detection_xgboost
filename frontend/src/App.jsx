@@ -3,6 +3,25 @@ import Header from './components/Header'
 import TransactionForm from './components/TransactionForm'
 import ResultPanel from './components/ResultPanel'
 
+const styles = `
+  @keyframes stripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 0; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+`
+
 function App() {
   const [status, setStatus] = useState('checking')
   const [result, setResult] = useState(null)
@@ -34,13 +53,16 @@ function App() {
   }
 
   return (
-    <div style={{ background: '#F3F4F6', minHeight: '100vh' }}>
-      <Header status={status} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: '20px 24px', maxWidth: 900, margin: '0 auto' }}>
-        <TransactionForm onSubmit={handleSubmit} loading={loading} />
-        <ResultPanel result={result} formData={formData} />
+    <>
+      <style>{styles}</style>
+      <div style={{ background: '#0A1628', minHeight: '100vh' }}>
+        <Header status={status} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '20px 24px', maxWidth: 600, margin: '0 auto' }}>
+          <TransactionForm onSubmit={handleSubmit} loading={loading} />
+          <ResultPanel result={result} formData={formData} />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
