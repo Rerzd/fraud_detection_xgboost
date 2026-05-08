@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+dist/
+.env
+
+# OS
+.DS_Store
