@@ -29,7 +29,7 @@ function App() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/health')
+    fetch('http://localhost:8000/health')
       .then(r => r.json())
       .then(() => setStatus('online'))
       .catch(() => setStatus('offline'))
@@ -39,7 +39,7 @@ function App() {
     setLoading(true)
     setFormData(data)
     try {
-      const r = await fetch('http://127.0.0.1:8000/predict', {
+      const r = await fetch('http://localhost:8000/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
