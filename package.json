@@ -1,0 +1,23 @@
+{
+  "name": "fraud-detection-xgboost",
+  "private": true,
+  "description": "Fraud scoring console: FastAPI + XGBoost API trained on PaySim, with a React frontend.",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "concurrently --kill-others --names api,web --prefix-colors blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node scripts/py.mjs -m uvicorn app.main:app --app-dir backend --reload --reload-dir backend/app --port 8000",
+    "dev:web": "npm --prefix frontend run dev",
+    "test": "npm run test:api && npm run test:web",
+    "test:api": "node scripts/py.mjs -m pytest backend/tests -q",
+    "test:web": "npm --prefix frontend test",
+    "lint": "npm --prefix frontend run lint",
+    "build": "npm --prefix frontend run build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
