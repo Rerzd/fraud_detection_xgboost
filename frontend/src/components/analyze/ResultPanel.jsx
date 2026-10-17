@@ -31,7 +31,7 @@ function Score({ result, thresholds }) {
           <p className="mt-1 font-mono text-[11px] text-ink-faint">p = {formatRawProbability(result.probability)}</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
-          <RiskBadge level={result.risk_level} size="lg" />
+          <RiskBadge level={result.risk_level} size="md" />
           <p className="text-sm text-fg">{risk.decision}</p>
         </div>
       </div>
