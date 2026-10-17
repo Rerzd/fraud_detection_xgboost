@@ -40,6 +40,21 @@ const paths = {
   ),
   trash: <path d="M4.5 7h15M10 4h4M6.5 7l1 12.5h9l1-12.5M10 11v5M14 11v5" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  flag: (
+    <>
+      <path d="M6 20.5v-17" />
+      <path d="M6 4.5h11.5l-2.5 4 2.5 4H6" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+      <circle cx="12" cy="12" r="2.75" />
+    </>
+  ),
+  play: <path d="M8 5.5v13l10.5-6.5L8 5.5Z" />,
+  'chevron-right': <path d="m9.5 5.5 6.5 6.5-6.5 6.5" />,
+  'chevron-down': <path d="m5.5 9.5 6.5 6.5 6.5-6.5" />,
   refresh: (
     <>
       <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" />
@@ -73,7 +88,7 @@ export default function Icon({ name, className = 'size-4', title }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.75"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
