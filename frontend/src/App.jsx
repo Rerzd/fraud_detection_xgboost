@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import AnalyzeTab from './components/analyze/AnalyzeTab'
 import AppHeader from './components/AppHeader'
 import OfflineBanner from './components/OfflineBanner'
 import TabNav from './components/TabNav'
 import EmptyState from './components/ui/EmptyState'
 import Panel from './components/ui/Panel'
 import useHealth from './hooks/useHealth'
+import useModelInfo from './hooks/useModelInfo'
 
 const TABS = [
   { id: 'analyze', label: 'Analyze', icon: 'pulse' },
@@ -21,6 +23,8 @@ function tabFromHash() {
 export default function App() {
   const { status, modelVersion } = useHealth()
   const [tab, setTab] = useState(tabFromHash)
+  const online = status === 'online'
+  const { info: modelInfo } = useModelInfo(online)
 
   useEffect(() => {
     const onHashChange = () => setTab(tabFromHash())
@@ -46,11 +50,15 @@ export default function App() {
         aria-labelledby={`tab-${tab}`}
         className="mx-auto max-w-7xl px-4 py-6 sm:px-6"
       >
-        <Panel title={current.label}>
-          <EmptyState icon={current.icon} title={`${current.label} view`}>
-            This section is being rebuilt.
-          </EmptyState>
-        </Panel>
+        {tab === 'analyze' ? (
+          <AnalyzeTab thresholds={modelInfo?.thresholds} online={online} />
+        ) : (
+          <Panel title={current.label}>
+            <EmptyState icon={current.icon} title={`${current.label} view`}>
+              This section is being rebuilt.
+            </EmptyState>
+          </Panel>
+        )}
       </main>
     </div>
   )
