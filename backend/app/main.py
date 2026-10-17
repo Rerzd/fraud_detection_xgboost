@@ -7,9 +7,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.examples import EXAMPLES
 from app.model import FraudModel, risk_level
+from app.model_card import build_model_card
 from app.preprocessing import build_features, features_to_dict
-from app.schemas import HealthOut, PredictionOut, TransactionIn
+from app.schemas import ExampleOut, HealthOut, PredictionOut, TransactionIn
+from app.signals import describe
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +55,22 @@ def health(request: Request) -> HealthOut:
     )
 
 
+@app.get("/model/info")
+def model_info(request: Request) -> dict:
+    return build_model_card(get_model(request), request.app.state.settings)
+
+
+@app.get("/examples", response_model=list[ExampleOut])
+def examples() -> list[dict]:
+    return EXAMPLES
+
+
 @app.post("/predict", response_model=PredictionOut)
 def predict(tx: TransactionIn, request: Request) -> PredictionOut:
     model = get_model(request)
     settings = request.app.state.settings
-    features = build_features([tx.model_dump()])
+    raw = tx.model_dump()
+    features = build_features([raw])
     probability = model.predict_proba(features)[0]
     level = risk_level(probability, settings.review_threshold, settings.fraud_threshold)
     return PredictionOut(
@@ -65,4 +79,6 @@ def predict(tx: TransactionIn, request: Request) -> PredictionOut:
         is_fraud=level == "high",
         threshold=settings.fraud_threshold,
         features=features_to_dict(features.iloc[0]),
+        explanation=model.explain(features),
+        signals=describe(raw),
     )

@@ -32,12 +32,32 @@ class EngineeredFeatures(BaseModel):
     errorbalanceOrig: float | None
 
 
+class Contribution(BaseModel):
+    feature: str
+    value: float | None
+    contribution: float = Field(description="Log-odds contribution toward fraud")
+
+
+class Explanation(BaseModel):
+    base_value: float = Field(description="Model bias in log-odds")
+    contributions: list[Contribution] = Field(description="Sorted by absolute contribution")
+
+
 class PredictionOut(BaseModel):
     probability: float
     risk_level: RiskLevel
     is_fraud: bool
     threshold: float
     features: EngineeredFeatures
+    explanation: Explanation
+    signals: list[str] = Field(description="Descriptive rule observations, not model reasoning")
+
+
+class ExampleOut(BaseModel):
+    id: str
+    label: RiskLevel
+    description: str
+    transaction: TransactionIn
 
 
 class HealthOut(BaseModel):
