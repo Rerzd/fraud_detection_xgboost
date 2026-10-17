@@ -11,7 +11,7 @@ function Section({ title, aside, children }) {
     <section className="border-t border-line pt-5">
       <div className="mb-3 flex items-baseline justify-between gap-3">
         <h3 className="text-sm font-medium text-fg">{title}</h3>
-        {aside && <span className="text-[11px] text-subtle">{aside}</span>}
+        {aside && <span className="text-[11px] text-ink-faint">{aside}</span>}
       </div>
       {children}
     </section>
@@ -28,7 +28,7 @@ function Score({ result, thresholds }) {
           <p className={`font-mono text-5xl font-medium tracking-tight tabular ${risk.text}`}>
             {formatProbability(result.probability)}
           </p>
-          <p className="mt-1 font-mono text-[11px] text-subtle">p = {formatRawProbability(result.probability)}</p>
+          <p className="mt-1 font-mono text-[11px] text-ink-faint">p = {formatRawProbability(result.probability)}</p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <RiskBadge level={result.risk_level} size="lg" />
@@ -84,15 +84,15 @@ export default function ResultPanel({ result, raw, thresholds, error, loading })
           <ul className="space-y-2">
             {result.signals.map((s) => (
               <li key={s} className="flex gap-2.5 text-xs text-muted">
-                <span className="mt-1.5 size-1 shrink-0 rounded-full bg-subtle" aria-hidden="true" />
+                <span className="mt-1.5 size-1 shrink-0 rounded-full bg-ink-faint" aria-hidden="true" />
                 {s}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-subtle">No notable patterns in the raw balances.</p>
+          <p className="text-xs text-ink-faint">No notable patterns in the raw balances.</p>
         )}
-        <p className="mt-3 text-[11px] text-subtle">
+        <p className="mt-3 text-[11px] text-ink-faint">
           Rule-based observations about the input. They are not used by the model and do not explain the score.
         </p>
       </Section>

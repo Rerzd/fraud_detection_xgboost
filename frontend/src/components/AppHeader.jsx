@@ -1,7 +1,7 @@
 import Icon from './ui/Icon'
 
 const STATUS = {
-  checking: { label: 'Checking', dot: 'bg-subtle animate-pulse' },
+  checking: { label: 'Checking', dot: 'bg-ink-faint animate-pulse' },
   online: { label: 'Online', dot: 'bg-risk-low' },
   offline: { label: 'Offline', dot: 'bg-risk-high' },
 }
@@ -20,7 +20,7 @@ function StatusPill({ status, modelVersion }) {
         {s.label}
       </span>
       {status === 'online' && modelVersion && (
-        <span className="hidden font-mono text-subtle sm:inline">{modelVersion}</span>
+        <span className="hidden font-mono text-ink-faint sm:inline">{modelVersion}</span>
       )}
     </div>
   )
@@ -28,7 +28,7 @@ function StatusPill({ status, modelVersion }) {
 
 export default function AppHeader({ status, modelVersion }) {
   return (
-    <header className="border-b border-line bg-ink/80 backdrop-blur">
+    <header className="border-b border-line bg-surface">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-panel text-accent">

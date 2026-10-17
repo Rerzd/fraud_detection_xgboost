@@ -29,7 +29,7 @@ export default function RiskMeter({ probability, level, reviewThreshold, fraudTh
           style={{ left: pct(probability) }}
         />
       </div>
-      <div className="relative mt-1.5 h-4 font-mono text-[10px] text-subtle">
+      <div className="relative mt-1.5 h-4 font-mono text-[10px] text-ink-faint">
         <span className="absolute left-0">0</span>
         {ticks.map((t) => (
           <span key={t} className="absolute -translate-x-1/2" style={{ left: pct(t) }}>

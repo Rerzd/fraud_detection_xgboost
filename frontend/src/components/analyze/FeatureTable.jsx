@@ -23,7 +23,7 @@ export default function FeatureTable({ features, raw }) {
     <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="border-b border-line text-left text-subtle">
+          <tr className="border-b border-line text-left text-ink-faint">
             <th scope="col" className="py-2 pr-3 font-normal">Feature</th>
             <th scope="col" className="py-2 pr-3 text-right font-normal">Model input</th>
             <th scope="col" className="py-2 font-normal">Note</th>
@@ -39,13 +39,13 @@ export default function FeatureTable({ features, raw }) {
                 <td className={`py-1.5 pr-3 text-right font-mono tabular ${changed ? 'text-accent' : 'text-fg'}`}>
                   {display(feature, value)}
                 </td>
-                <td className={`py-1.5 text-[11px] ${changed ? 'text-accent' : 'text-subtle'}`}>{n}</td>
+                <td className={`py-1.5 text-[11px] ${changed ? 'text-accent' : 'text-ink-faint'}`}>{n}</td>
               </tr>
             )
           })}
         </tbody>
       </table>
-      <p className="mt-3 text-[11px] leading-relaxed text-subtle">
+      <p className="mt-3 text-[11px] leading-relaxed text-ink-faint">
         Rules from training: destination balances 0/0 with a non-zero amount become -1; origin balances 0/0 become
         NaN. The error balances are computed afterwards.
       </p>

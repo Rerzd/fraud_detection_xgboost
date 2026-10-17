@@ -20,13 +20,13 @@ function Field({ name, label, hint, value, error, onChange, inputMode = 'decimal
         onChange={(e) => onChange(name, e.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
-        className={`w-full rounded-lg border bg-raised px-3 py-2 font-mono text-sm text-fg tabular placeholder:text-subtle focus:border-accent focus:outline-none ${
+        className={`w-full rounded-lg border bg-raised px-3 py-2 font-mono text-sm text-fg tabular placeholder:text-ink-faint focus:border-accent focus:outline-none ${
           error ? 'border-risk-high/60' : 'border-line'
         }`}
         placeholder={placeholder}
       />
       {hint && !error && (
-        <p id={`${name}-hint`} className="mt-1 text-[11px] text-subtle">
+        <p id={`${name}-hint`} className="mt-1 text-[11px] text-ink-faint">
           {hint}
         </p>
       )}
@@ -63,7 +63,7 @@ function TypeControl({ value, onChange, error }) {
           )
         })}
       </div>
-      <p className="mt-1.5 text-[11px] text-subtle">
+      <p className="mt-1.5 text-[11px] text-ink-faint">
         The model was trained only on these two types: in PaySim, fraud never occurs in the others.
       </p>
       {error && <p className="mt-1 text-[11px] text-risk-high">{error}</p>}
@@ -74,7 +74,7 @@ function TypeControl({ value, onChange, error }) {
 function AccountGroup({ title, fields, values, errors, onChange }) {
   return (
     <fieldset className="rounded-lg border border-line p-3.5">
-      <legend className="px-1 text-[11px] font-medium tracking-wider text-subtle uppercase">{title}</legend>
+      <legend className="px-1 text-[11px] font-medium tracking-wider text-ink-faint uppercase">{title}</legend>
       <div className="grid grid-cols-2 gap-3">
         {fields.map(([name, label]) => (
           <Field

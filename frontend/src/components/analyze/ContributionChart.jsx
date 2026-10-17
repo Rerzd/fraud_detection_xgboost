@@ -16,7 +16,7 @@ export default function ContributionChart({ explanation }) {
 
   return (
     <div>
-      <div className="mb-2 flex justify-between text-[11px] text-subtle">
+      <div className="mb-2 flex justify-between text-[11px] text-ink-faint">
         <span>Away from fraud</span>
         <span>Toward fraud</span>
       </div>
@@ -29,7 +29,7 @@ export default function ContributionChart({ explanation }) {
               <div className="mb-1 flex items-baseline justify-between gap-3 text-xs">
                 <span className="min-w-0 truncate">
                   <span className="font-mono text-fg">{c.feature}</span>
-                  <span className="ml-2 font-mono text-subtle">{displayValue(c.feature, c.value)}</span>
+                  <span className="ml-2 font-mono text-ink-faint">{displayValue(c.feature, c.value)}</span>
                 </span>
                 <span className={`font-mono tabular ${positive ? 'text-risk-high' : 'text-risk-low'}`}>
                   {formatSigned(c.contribution)}
