@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import AnalyzeTab from './components/analyze/AnalyzeTab'
 import AppHeader from './components/AppHeader'
+import BatchTab from './components/batch/BatchTab'
 import OfflineBanner from './components/OfflineBanner'
 import TabNav from './components/TabNav'
 import EmptyState from './components/ui/EmptyState'
@@ -52,6 +53,8 @@ export default function App() {
       >
         {tab === 'analyze' ? (
           <AnalyzeTab thresholds={modelInfo?.thresholds} online={online} />
+        ) : tab === 'batch' ? (
+          <BatchTab online={online} />
         ) : (
           <Panel title={current.label}>
             <EmptyState icon={current.icon} title={`${current.label} view`}>
