@@ -1,7 +1,7 @@
 const VARIANTS = {
   primary: 'bg-accent text-white hover:bg-accent-hover disabled:bg-accent/50',
-  secondary: 'border border-line-strong bg-raised text-fg hover:border-accent/60 disabled:text-subtle',
-  ghost: 'text-muted hover:bg-raised hover:text-fg disabled:text-subtle',
+  secondary: 'border border-line-strong bg-raised text-fg hover:border-accent/60 disabled:text-ink-faint',
+  ghost: 'text-muted hover:bg-raised hover:text-fg disabled:text-ink-faint',
   danger: 'border border-risk-high/40 text-risk-high hover:bg-risk-high/10',
 }
 

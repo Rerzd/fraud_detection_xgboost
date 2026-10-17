@@ -20,7 +20,7 @@ export default function RiskFilter({ value, onChange, counts }) {
           >
             {o.id && <span className={`size-1.5 rounded-full ${RISK[o.id].bg}`} aria-hidden="true" />}
             {o.label}
-            {counts && <span className="font-mono text-subtle tabular">{counts[o.id || 'all'] ?? 0}</span>}
+            {counts && <span className="font-mono text-ink-faint tabular">{counts[o.id || 'all'] ?? 0}</span>}
           </button>
         )
       })}
