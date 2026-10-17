@@ -1,0 +1,10 @@
+.venv/
+data/
+tests/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.ipynb
+.ipynb_checkpoints/
+requirements-dev.txt
+pytest.ini
