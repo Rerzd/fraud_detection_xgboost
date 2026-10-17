@@ -4,7 +4,9 @@ import warnings
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
+import xgboost as xgb
 from sklearn.exceptions import InconsistentVersionWarning
 from sklearn.pipeline import Pipeline
 
@@ -35,3 +37,29 @@ class FraudModel:
     def predict_proba(self, features: pd.DataFrame) -> list[float]:
         """Probability of the fraud class for each row."""
         return [float(p) for p in self.pipeline.predict_proba(features)[:, 1]]
+
+    def explain(self, features: pd.DataFrame) -> dict:
+        """Per-feature contributions (log-odds) for the first row, via XGBoost pred_contribs.
+
+        sum(contributions) + base_value == logit(probability).
+        """
+        X = features
+        if len(self.pipeline.steps) > 1:
+            X = self.pipeline[:-1].transform(features)
+        names = list(features.columns)
+        booster = self.pipeline[-1].get_booster()
+        contribs = booster.predict(
+            xgb.DMatrix(np.asarray(X, dtype=float), feature_names=names, missing=np.nan),
+            pred_contribs=True,
+        )[0]
+        row = features.iloc[0]
+        items = [
+            {
+                "feature": name,
+                "value": None if pd.isna(row[name]) else float(row[name]),
+                "contribution": float(contribs[i]),
+            }
+            for i, name in enumerate(names)
+        ]
+        items.sort(key=lambda item: abs(item["contribution"]), reverse=True)
+        return {"base_value": float(contribs[-1]), "contributions": items}
