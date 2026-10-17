@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getBatchLimits, predictBatch } from '../../api'
 import { checkFile, downloadText, resultsCsv, templateCsv } from '../../lib/csv'
+import { Page } from '../shell/PageHeader'
 import Button from '../ui/Button'
 import Icon from '../ui/Icon'
 import Panel from '../ui/Panel'
@@ -47,7 +48,7 @@ export default function BatchTab({ online }) {
   }
 
   return (
-    <div className="space-y-6">
+    <Page id="batch">
       <Panel
         title="Batch scoring"
         description="Score a CSV of raw transactions. Scored rows are saved to the history."
@@ -91,6 +92,6 @@ export default function BatchTab({ online }) {
           <BatchResults key={result.batch_id} result={result} />
         </Panel>
       )}
-    </div>
+    </Page>
   )
 }

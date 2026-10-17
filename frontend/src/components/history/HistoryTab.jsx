@@ -5,6 +5,7 @@ import Button from '../ui/Button'
 import ConfirmDialog from '../ui/ConfirmDialog'
 import EmptyState from '../ui/EmptyState'
 import Icon from '../ui/Icon'
+import { Page } from '../shell/PageHeader'
 import Panel from '../ui/Panel'
 import RiskFilter from '../ui/RiskFilter'
 import Spinner from '../ui/Spinner'
@@ -78,11 +79,13 @@ export default function HistoryTab({ online }) {
 
   if (!online) {
     return (
-      <Panel title="History">
-        <EmptyState icon="clock" title="Backend offline">
-          History is stored by the API. Start the backend to see past predictions.
-        </EmptyState>
-      </Panel>
+      <Page id="history">
+        <Panel title="History">
+          <EmptyState icon="clock" title="Backend offline">
+            History is stored by the API. Start the backend to see past predictions.
+          </EmptyState>
+        </Panel>
+      </Page>
     )
   }
 
@@ -91,7 +94,7 @@ export default function HistoryTab({ online }) {
   const shownTotal = stats ? (filter ? stats.by_risk[filter] : stats.total) : 0
 
   return (
-    <div className="space-y-6">
+    <Page id="history">
       {stats && <Stats stats={stats} />}
 
       <Panel
@@ -166,6 +169,6 @@ export default function HistoryTab({ online }) {
         This permanently deletes all {stats?.total.toLocaleString('en-US')} stored predictions, single and batch. The
         model is not affected.
       </ConfirmDialog>
-    </div>
+    </Page>
   )
 }

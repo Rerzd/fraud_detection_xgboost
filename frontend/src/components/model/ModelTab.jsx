@@ -1,6 +1,7 @@
 import { formatPercent, RISK_LEVELS } from '../../lib/format'
 import EmptyState from '../ui/EmptyState'
 import Icon from '../ui/Icon'
+import { Page } from '../shell/PageHeader'
 import Panel from '../ui/Panel'
 import RiskBadge from '../ui/RiskBadge'
 import Spinner from '../ui/Spinner'
@@ -163,25 +164,29 @@ function Limitations({ items }) {
 export default function ModelTab({ info, error, online }) {
   if (!online || error) {
     return (
-      <Panel title="Model">
-        <EmptyState icon="cpu" title={online ? 'Could not load the model card' : 'Backend offline'}>
-          {error || 'The model card is served by the API. Start the backend to see it.'}
-        </EmptyState>
-      </Panel>
+      <Page id="model">
+        <Panel title="Model">
+          <EmptyState icon="cpu" title={online ? 'Could not load the model card' : 'Backend offline'}>
+            {error || 'The model card is served by the API. Start the backend to see it.'}
+          </EmptyState>
+        </Panel>
+      </Page>
     )
   }
   if (!info) {
     return (
-      <Panel title="Model">
-        <div className="flex justify-center py-14 text-muted">
-          <Spinner className="size-5" />
-        </div>
-      </Panel>
+      <Page id="model">
+        <Panel title="Model">
+          <div className="flex justify-center py-14 text-muted">
+            <Spinner className="size-5" />
+          </div>
+        </Panel>
+      </Page>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <Page id="model">
       <Panel
         title={info.name}
         description={
@@ -200,6 +205,6 @@ export default function ModelTab({ info, error, online }) {
 
       <Features features={info.features} />
       <Limitations items={info.limitations} />
-    </div>
+    </Page>
   )
 }

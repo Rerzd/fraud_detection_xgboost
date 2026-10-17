@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getExamples, predict } from '../../api'
 import { EMPTY_FORM, toFormValues, validateTransaction } from '../../lib/validation'
+import { Page } from '../shell/PageHeader'
 import Panel from '../ui/Panel'
 import ResultPanel from './ResultPanel'
 import TransactionForm from './TransactionForm'
@@ -61,29 +62,31 @@ export default function AnalyzeTab({ thresholds, online }) {
   const activeThresholds = thresholds ?? { review: null, fraud: result?.threshold }
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-      <Panel title="Transaction" description="Raw PaySim fields. Derived features are computed by the backend.">
-        <TransactionForm
-          values={values}
-          errors={errors}
-          onChange={change}
-          onSubmit={submit}
-          loading={loading}
-          examples={examples}
-          onExample={loadExample}
-        />
-      </Panel>
-      <div ref={resultRef} className="scroll-mt-4">
-        <Panel title="Result" className="min-h-80">
-          <ResultPanel
-            result={result}
-            raw={submitted}
-            thresholds={activeThresholds}
-            error={apiError}
+    <Page id="analyze">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+        <Panel title="Transaction" description="Raw PaySim fields. Derived features are computed by the backend.">
+          <TransactionForm
+            values={values}
+            errors={errors}
+            onChange={change}
+            onSubmit={submit}
             loading={loading}
+            examples={examples}
+            onExample={loadExample}
           />
         </Panel>
+        <div ref={resultRef} className="scroll-mt-4">
+          <Panel title="Result" className="min-h-80">
+            <ResultPanel
+              result={result}
+              raw={submitted}
+              thresholds={activeThresholds}
+              error={apiError}
+              loading={loading}
+            />
+          </Panel>
+        </div>
       </div>
-    </div>
+    </Page>
   )
 }
