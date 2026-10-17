@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import AnalyzeTab from './components/analyze/AnalyzeTab'
 import AppHeader from './components/AppHeader'
 import BatchTab from './components/batch/BatchTab'
+import HistoryTab from './components/history/HistoryTab'
+import ModelTab from './components/model/ModelTab'
 import OfflineBanner from './components/OfflineBanner'
 import TabNav from './components/TabNav'
-import EmptyState from './components/ui/EmptyState'
-import Panel from './components/ui/Panel'
 import useHealth from './hooks/useHealth'
 import useModelInfo from './hooks/useModelInfo'
 
@@ -25,7 +25,7 @@ export default function App() {
   const { status, modelVersion } = useHealth()
   const [tab, setTab] = useState(tabFromHash)
   const online = status === 'online'
-  const { info: modelInfo } = useModelInfo(online)
+  const { info: modelInfo, error: modelError } = useModelInfo(online)
 
   useEffect(() => {
     const onHashChange = () => setTab(tabFromHash())
@@ -37,8 +37,6 @@ export default function App() {
     setTab(id)
     window.history.replaceState(null, '', `#${id}`)
   }
-
-  const current = TABS.find((t) => t.id === tab)
 
   return (
     <div className="min-h-screen">
@@ -55,12 +53,10 @@ export default function App() {
           <AnalyzeTab thresholds={modelInfo?.thresholds} online={online} />
         ) : tab === 'batch' ? (
           <BatchTab online={online} />
+        ) : tab === 'history' ? (
+          <HistoryTab online={online} />
         ) : (
-          <Panel title={current.label}>
-            <EmptyState icon={current.icon} title={`${current.label} view`}>
-              This section is being rebuilt.
-            </EmptyState>
-          </Panel>
+          <ModelTab info={modelInfo} error={modelError} online={online} />
         )}
       </main>
     </div>
