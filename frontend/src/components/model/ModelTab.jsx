@@ -25,7 +25,7 @@ function RichText({ text }) {
 function Field({ label, children }) {
   return (
     <div className="grid grid-cols-[minmax(7rem,10rem)_1fr] gap-3 border-b border-line/60 py-2 text-xs last:border-b-0">
-      <dt className="text-subtle">{label}</dt>
+      <dt className="text-ink-faint">{label}</dt>
       <dd className="min-w-0 break-words text-fg">{children}</dd>
     </div>
   )
@@ -42,7 +42,7 @@ function Metrics({ metrics }) {
         <StatTile label="Recall" value={fraud.recall.toFixed(2)} hint="fraud class at 0.5" />
         <StatTile label="F1" value={fraud.f1.toFixed(2)} hint="fraud class at 0.5" />
       </div>
-      <p className="text-[11px] leading-relaxed text-subtle">
+      <p className="text-[11px] leading-relaxed text-ink-faint">
         Held-out test set: {metrics.test_rows.toLocaleString('en-US')} transactions,{' '}
         {metrics.test_frauds.toLocaleString('en-US')} of them fraud ({formatPercent(prevalence, 2)}). Values as reported
         by the training notebook.
@@ -107,7 +107,7 @@ function Thresholds({ thresholds }) {
           )
         })}
       </ul>
-      <p className="mt-5 text-[11px] leading-relaxed text-subtle">
+      <p className="mt-5 text-[11px] leading-relaxed text-ink-faint">
         Thresholds are read from the API configuration, so the whole interface uses the same cut-offs.
       </p>
     </Panel>
@@ -120,7 +120,7 @@ function Features({ features }) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-line text-left text-subtle">
+            <tr className="border-b border-line text-left text-ink-faint">
               <th scope="col" className="w-8 py-2 pr-3 font-normal">#</th>
               <th scope="col" className="py-2 pr-3 font-normal">Feature</th>
               <th scope="col" className="py-2 font-normal">Description</th>
@@ -129,7 +129,7 @@ function Features({ features }) {
           <tbody>
             {features.map((f, i) => (
               <tr key={f.name} className="border-b border-line/60 align-top">
-                <td className="py-2 pr-3 font-mono text-subtle tabular">{i + 1}</td>
+                <td className="py-2 pr-3 font-mono text-ink-faint tabular">{i + 1}</td>
                 <td className="py-2 pr-3 font-mono whitespace-nowrap text-fg">{f.name}</td>
                 <td className="py-2 text-muted">
                   <RichText text={f.description} />
@@ -149,7 +149,7 @@ function Limitations({ items }) {
       <ul className="space-y-2.5">
         {items.map((item) => (
           <li key={item} className="flex gap-2.5 text-sm text-muted">
-            <Icon name="alert" className="mt-0.5 size-4 shrink-0 text-subtle" />
+            <Icon name="alert" className="mt-0.5 size-4 shrink-0 text-ink-faint" />
             <span>
               <RichText text={item} />
             </span>

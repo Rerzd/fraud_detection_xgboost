@@ -21,7 +21,7 @@ export default function ThresholdScale({ review, fraud }) {
           </div>
         ))}
       </div>
-      <div className="relative mt-1.5 h-4 font-mono text-[10px] text-subtle">
+      <div className="relative mt-1.5 h-4 font-mono text-[10px] text-ink-faint">
         <span className="absolute left-0">0</span>
         {[review, fraud].map((t) => (
           <span key={t} className="absolute -translate-x-1/2" style={{ left: pct(t) }}>

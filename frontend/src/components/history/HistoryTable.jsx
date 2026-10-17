@@ -5,7 +5,7 @@ function Source({ item }) {
   if (item.source === 'single') return <span className="text-muted">Single</span>
   return (
     <span className="text-muted">
-      Batch <span className="font-mono text-subtle">{item.batch_id?.slice(0, 8)}</span>
+      Batch <span className="font-mono text-ink-faint">{item.batch_id?.slice(0, 8)}</span>
     </span>
   )
 }
@@ -15,7 +15,7 @@ export default function HistoryTable({ items }) {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[40rem] text-xs">
         <thead>
-          <tr className="border-b border-line text-left text-subtle">
+          <tr className="border-b border-line text-left text-ink-faint">
             <th scope="col" className="py-2 pr-3 font-normal">Time</th>
             <th scope="col" className="py-2 pr-3 font-normal">Risk</th>
             <th scope="col" className="py-2 pr-3 text-right font-normal">Probability</th>

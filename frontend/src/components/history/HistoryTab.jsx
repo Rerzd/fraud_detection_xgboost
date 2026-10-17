@@ -142,14 +142,14 @@ export default function HistoryTab({ online }) {
               <p className="py-6 text-center text-sm text-muted">No predictions at this risk level.</p>
             )}
             {shownTotal > items.length && (
-              <p className="text-[11px] text-subtle">
+              <p className="text-[11px] text-ink-faint">
                 Showing the latest {items.length} of {shownTotal.toLocaleString('en-US')}.
               </p>
             )}
           </div>
         )}
 
-        <p className="mt-5 flex items-center gap-2 border-t border-line pt-4 text-[11px] text-subtle">
+        <p className="mt-5 flex items-center gap-2 border-t border-line pt-4 text-[11px] text-ink-faint">
           <Icon name="info" className="size-3.5" />
           Stored in a local SQLite database.
         </p>

@@ -44,7 +44,7 @@ export default function Dropzone({ onFile, limits, loading }) {
           )}
         </p>
         {limits && (
-          <p className="mt-1 text-xs text-subtle">
+          <p className="mt-1 text-xs text-ink-faint">
             Up to {limits.max_rows.toLocaleString('en-US')} rows and {formatBytes(limits.max_bytes)}. Columns:{' '}
             <span className="font-mono">{limits.required_columns.join(', ')}</span>
           </p>

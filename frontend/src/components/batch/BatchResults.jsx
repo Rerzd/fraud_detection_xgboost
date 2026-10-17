@@ -32,7 +32,7 @@ function RowsTable({ rows }) {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[46rem] text-xs">
         <thead>
-          <tr className="border-b border-line text-left text-subtle">
+          <tr className="border-b border-line text-left text-ink-faint">
             <th scope="col" className="py-2 pr-3 font-normal">Line</th>
             <th scope="col" className="py-2 pr-3 font-normal">Risk</th>
             <th scope="col" className="py-2 pr-3 text-right font-normal">Probability</th>
@@ -45,7 +45,7 @@ function RowsTable({ rows }) {
         <tbody className="font-mono tabular">
           {rows.map((r) => (
             <tr key={r.row} className="border-b border-line/60">
-              <td className="py-1.5 pr-3 text-subtle">{r.row}</td>
+              <td className="py-1.5 pr-3 text-ink-faint">{r.row}</td>
               <td className="py-1.5 pr-3 font-sans">
                 <RiskBadge level={r.risk_level} />
               </td>
@@ -70,18 +70,18 @@ function ErrorList({ errors }) {
   return (
     <div>
       <h3 className="mb-2 text-sm font-medium text-fg">
-        Rows not scored <span className="font-mono text-subtle">{errors.length}</span>
+        Rows not scored <span className="font-mono text-ink-faint">{errors.length}</span>
       </h3>
       <ul className="divide-y divide-line/60 rounded-lg border border-line text-xs">
         {errors.slice(0, MAX_VISIBLE_ERRORS).map((e) => (
           <li key={e.row} className="flex gap-3 px-3 py-2">
-            <span className="w-14 shrink-0 font-mono text-subtle">line {e.row}</span>
+            <span className="w-14 shrink-0 font-mono text-ink-faint">line {e.row}</span>
             <span className="min-w-0 break-words text-muted">{e.reason}</span>
           </li>
         ))}
       </ul>
       {errors.length > MAX_VISIBLE_ERRORS && (
-        <p className="mt-2 text-[11px] text-subtle">
+        <p className="mt-2 text-[11px] text-ink-faint">
           Showing the first {MAX_VISIBLE_ERRORS} of {errors.length} errors.
         </p>
       )}
@@ -109,7 +109,7 @@ export default function BatchResults({ result }) {
             <p className="py-6 text-center text-sm text-muted">No rows at this risk level.</p>
           )}
           {filtered.length > MAX_VISIBLE_ROWS && (
-            <p className="text-[11px] text-subtle">
+            <p className="text-[11px] text-ink-faint">
               Showing the top {MAX_VISIBLE_ROWS} of {filtered.length.toLocaleString('en-US')} rows by probability.
               Download the results CSV for all of them.
             </p>
