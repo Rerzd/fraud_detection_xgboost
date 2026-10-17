@@ -1,69 +1,57 @@
-import { useState, useEffect } from 'react'
-import Header from './components/Header'
-import TransactionForm from './components/TransactionForm'
-import ResultPanel from './components/ResultPanel'
+import { useEffect, useState } from 'react'
+import AppHeader from './components/AppHeader'
+import OfflineBanner from './components/OfflineBanner'
+import TabNav from './components/TabNav'
+import EmptyState from './components/ui/EmptyState'
+import Panel from './components/ui/Panel'
+import useHealth from './hooks/useHealth'
 
-const styles = `
-  @keyframes stripes {
-    0% { background-position: 0 0; }
-    100% { background-position: 20px 0; }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type="number"] {
-    -moz-appearance: textfield;
-  }
-`
+const TABS = [
+  { id: 'analyze', label: 'Analyze', icon: 'pulse' },
+  { id: 'batch', label: 'Batch', icon: 'layers' },
+  { id: 'history', label: 'History', icon: 'clock' },
+  { id: 'model', label: 'Model', icon: 'cpu' },
+]
 
-function App() {
-  const [status, setStatus] = useState('checking')
-  const [result, setResult] = useState(null)
-  const [formData, setFormData] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    fetch('http://localhost:8000/health')
-      .then(r => r.json())
-      .then(() => setStatus('online'))
-      .catch(() => setStatus('offline'))
-  }, [])
-
-  const handleSubmit = async (data) => {
-    setLoading(true)
-    setFormData(data)
-    try {
-      const r = await fetch('http://localhost:8000/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      const json = await r.json()
-      setResult(json)
-    } catch {
-      alert('Could not connect to backend. Make sure uvicorn is running.')
-    }
-    setLoading(false)
-  }
-
-  return (
-    <>
-      <style>{styles}</style>
-      <div style={{ background: '#0A1628', minHeight: '100vh' }}>
-        <Header status={status} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '20px 24px', maxWidth: 600, margin: '0 auto' }}>
-          <TransactionForm onSubmit={handleSubmit} loading={loading} />
-          <ResultPanel result={result} formData={formData} />
-        </div>
-      </div>
-    </>
-  )
+function tabFromHash() {
+  const id = window.location.hash.slice(1)
+  return TABS.some((t) => t.id === id) ? id : 'analyze'
 }
 
-export default App
+export default function App() {
+  const { status, modelVersion } = useHealth()
+  const [tab, setTab] = useState(tabFromHash)
+
+  useEffect(() => {
+    const onHashChange = () => setTab(tabFromHash())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  function changeTab(id) {
+    setTab(id)
+    window.history.replaceState(null, '', `#${id}`)
+  }
+
+  const current = TABS.find((t) => t.id === tab)
+
+  return (
+    <div className="min-h-screen">
+      <AppHeader status={status} modelVersion={modelVersion} />
+      {status === 'offline' && <OfflineBanner />}
+      <TabNav tabs={TABS} active={tab} onChange={changeTab} />
+      <main
+        id={`panel-${tab}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${tab}`}
+        className="mx-auto max-w-7xl px-4 py-6 sm:px-6"
+      >
+        <Panel title={current.label}>
+          <EmptyState icon={current.icon} title={`${current.label} view`}>
+            This section is being rebuilt.
+          </EmptyState>
+        </Panel>
+      </main>
+    </div>
+  )
+}
