@@ -16,6 +16,24 @@ NOTEBOOK_FRAUD_ROW = {
 
 
 @pytest.fixture
-def client():
-    with TestClient(app) as c:
-        yield c
+def make_client(tmp_path, monkeypatch):
+    """Start the app with env overrides and a fresh temporary SQLite file."""
+    clients = []
+
+    def factory(**env: str) -> TestClient:
+        monkeypatch.setenv("DB_PATH", str(tmp_path / "test.db"))
+        for key, value in env.items():
+            monkeypatch.setenv(key, value)
+        c = TestClient(app)
+        c.__enter__()
+        clients.append(c)
+        return c
+
+    yield factory
+    for c in clients:
+        c.__exit__(None, None, None)
+
+
+@pytest.fixture
+def client(make_client):
+    return make_client()
