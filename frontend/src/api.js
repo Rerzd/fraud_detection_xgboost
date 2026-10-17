@@ -39,6 +39,8 @@ export const getModelInfo = () => request('/model/info')
 export const getExamples = () => request('/examples')
 export const predict = (transaction) => request('/predict', json('POST', transaction))
 
+export const getBatchLimits = () => request('/predict/batch/limits')
+
 export function predictBatch(file) {
   const form = new FormData()
   form.append('file', file)
