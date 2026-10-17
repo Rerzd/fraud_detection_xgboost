@@ -78,3 +78,10 @@ def test_batch_row_limit(make_client):
 def test_batch_size_limit(make_client):
     response = upload(make_client(BATCH_MAX_BYTES="50"), CSV_3_VALID_1_INVALID)
     assert response.status_code == 413
+
+
+def test_batch_limits_come_from_config(make_client):
+    body = make_client(BATCH_MAX_ROWS="123").get("/predict/batch/limits").json()
+    assert body["max_rows"] == 123
+    assert body["max_bytes"] == 5 * 1024 * 1024
+    assert body["required_columns"] == HEADER.split(",")
