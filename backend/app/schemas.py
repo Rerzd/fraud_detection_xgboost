@@ -1,5 +1,6 @@
 """Request and response models."""
 
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -58,6 +59,52 @@ class ExampleOut(BaseModel):
     label: RiskLevel
     description: str
     transaction: TransactionIn
+
+
+class BatchRow(TransactionIn):
+    row: int = Field(description="CSV line number (header is line 1)")
+    probability: float
+    risk_level: RiskLevel
+
+
+class BatchRowError(BaseModel):
+    row: int
+    reason: str
+
+
+class BatchSummary(BaseModel):
+    total: int
+    scored: int
+    invalid: int
+    risk_counts: dict[RiskLevel, int]
+    flagged_rate: float = Field(description="Share of scored rows at high risk")
+
+
+class BatchOut(BaseModel):
+    batch_id: str
+    summary: BatchSummary
+    rows: list[BatchRow]
+    errors: list[BatchRowError]
+
+
+class HistoryItem(BaseModel):
+    id: int
+    created_at: datetime
+    source: Literal["single", "batch"]
+    batch_id: str | None
+    type: TransactionType
+    amount: float
+    probability: float
+    risk_level: RiskLevel
+    payload: dict
+
+    model_config = {"from_attributes": True}
+
+
+class StatsOut(BaseModel):
+    total: int
+    by_risk: dict[RiskLevel, int]
+    by_source: dict[Literal["single", "batch"], int]
 
 
 class HealthOut(BaseModel):
