@@ -2,6 +2,7 @@
   "name": "fraud-detection-xgboost",
   "private": true,
   "description": "Fraud scoring console: FastAPI + XGBoost API trained on PaySim, with a React frontend.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "setup": "node scripts/setup.mjs",
