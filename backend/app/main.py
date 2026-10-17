@@ -3,12 +3,12 @@
 import logging
 from contextlib import asynccontextmanager
 
-import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.model import FraudModel
+from app.model import FraudModel, risk_level
+from app.preprocessing import build_features, features_to_dict
 from app.schemas import HealthOut, PredictionOut, TransactionIn
 
 logger = logging.getLogger(__name__)
@@ -55,5 +55,14 @@ def health(request: Request) -> HealthOut:
 @app.post("/predict", response_model=PredictionOut)
 def predict(tx: TransactionIn, request: Request) -> PredictionOut:
     model = get_model(request)
-    probability = model.predict_proba(pd.DataFrame([tx.model_dump()]))[0]
-    return PredictionOut(fraud=probability > 0.5, probability=round(probability, 4))
+    settings = request.app.state.settings
+    features = build_features([tx.model_dump()])
+    probability = model.predict_proba(features)[0]
+    level = risk_level(probability, settings.review_threshold, settings.fraud_threshold)
+    return PredictionOut(
+        probability=probability,
+        risk_level=level,
+        is_fraud=level == "high",
+        threshold=settings.fraud_threshold,
+        features=features_to_dict(features.iloc[0]),
+    )

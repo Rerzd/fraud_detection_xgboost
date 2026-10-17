@@ -9,6 +9,15 @@ from sklearn.exceptions import InconsistentVersionWarning
 from sklearn.pipeline import Pipeline
 
 
+def risk_level(probability: float, review_threshold: float, fraud_threshold: float) -> str:
+    """low < review_threshold <= review < fraud_threshold <= high."""
+    if probability >= fraud_threshold:
+        return "high"
+    if probability >= review_threshold:
+        return "review"
+    return "low"
+
+
 class FraudModel:
     def __init__(self, pipeline: Pipeline, version: str):
         self.pipeline = pipeline
