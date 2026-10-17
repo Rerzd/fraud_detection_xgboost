@@ -11,3 +11,7 @@ dist/
 
 # OS
 .DS_Store
+# Local environments and data
+.venv/
+backend/data/
+.pytest_cache/
