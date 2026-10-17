@@ -1,16 +1,45 @@
-export default function Panel({ title, description, actions, children, className = '' }) {
+const TONES = {
+  default: { header: 'border-line bg-subtle', title: 'text-ink-muted' },
+  warning: { header: 'border-risk-review-line bg-risk-review-bg', title: 'text-risk-review' },
+  danger: { header: 'border-risk-high-line bg-risk-high-bg', title: 'text-risk-high' },
+}
+
+/**
+ * Bordered panel with a gray header strip: title on the left, meta and actions on the right.
+ * `flush` removes body padding (for tables that run edge to edge).
+ */
+export default function Panel({
+  id,
+  title,
+  description,
+  meta,
+  actions,
+  tone = 'default',
+  flush = false,
+  className = '',
+  bodyClassName = '',
+  children,
+}) {
+  const t = TONES[tone]
   return (
-    <section className={`rounded-xl border border-line bg-panel ${className}`}>
-      {(title || actions) && (
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-4">
+    <section id={id} className={`rounded border border-line-strong bg-surface ${className}`}>
+      {(title || meta || actions) && (
+        <header
+          className={`flex min-h-9 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-t-[3px] border-b px-4 py-2 ${t.header}`}
+        >
           <div className="min-w-0">
-            {title && <h2 className="text-sm font-medium text-fg">{title}</h2>}
-            {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
+            {title && <h2 className={`text-xs font-semibold tracking-wider uppercase ${t.title}`}>{title}</h2>}
+            {description && <p className="text-xs text-ink-faint">{description}</p>}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {(meta || actions) && (
+            <div className="flex shrink-0 items-center gap-2 text-xs text-ink-faint">
+              {meta}
+              {actions}
+            </div>
+          )}
         </header>
       )}
-      <div className="p-5">{children}</div>
+      <div className={flush ? bodyClassName : `px-4 py-3 ${bodyClassName}`}>{children}</div>
     </section>
   )
 }
