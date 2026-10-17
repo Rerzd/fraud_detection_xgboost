@@ -80,6 +80,12 @@ class BatchSummary(BaseModel):
     flagged_rate: float = Field(description="Share of scored rows at high risk")
 
 
+class BatchLimits(BaseModel):
+    max_rows: int
+    max_bytes: int
+    required_columns: list[str]
+
+
 class BatchOut(BaseModel):
     batch_id: str
     summary: BatchSummary

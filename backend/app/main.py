@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app import repository
-from app.batch import BatchError, parse_csv
+from app.batch import REQUIRED_COLUMNS, BatchError, parse_csv
 from app.config import Settings, get_settings
 from app.db import init_db
 from app.examples import EXAMPLES
@@ -19,6 +19,7 @@ from app.model import FraudModel, risk_level
 from app.model_card import build_model_card
 from app.preprocessing import build_features, features_to_dict
 from app.schemas import (
+    BatchLimits,
     BatchOut,
     ExampleOut,
     HealthOut,
@@ -112,6 +113,15 @@ def predict(tx: TransactionIn, model: ModelDep, settings: SettingsDep, session: 
         features=features_to_dict(features.iloc[0]),
         explanation=model.explain(features),
         signals=describe(raw),
+    )
+
+
+@app.get("/predict/batch/limits", response_model=BatchLimits)
+def batch_limits(settings: SettingsDep) -> BatchLimits:
+    return BatchLimits(
+        max_rows=settings.batch_max_rows,
+        max_bytes=settings.batch_max_bytes,
+        required_columns=REQUIRED_COLUMNS,
     )
 
 
