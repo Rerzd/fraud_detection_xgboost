@@ -23,21 +23,22 @@ export default function ConfirmDialog({ open, title, children, confirmLabel, bus
       onClick={(e) => {
         if (e.target === ref.current && !busy) onCancel()
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-line-strong bg-panel text-fg shadow-2xl backdrop:bg-ink/75"
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded border border-line-strong bg-surface p-0 text-ink backdrop:bg-ink/50"
     >
-      <div className="p-5">
-        <h2 id={titleId} className="text-sm font-medium text-fg">
-          {title}
-        </h2>
-        <div className="mt-2 text-sm text-muted">{children}</div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button onClick={onCancel} disabled={busy} autoFocus>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={onConfirm} disabled={busy}>
-            {busy ? 'Working' : confirmLabel}
-          </Button>
-        </div>
+      <h2
+        id={titleId}
+        className="rounded-t-[3px] border-b border-line bg-subtle px-4 py-2 text-xs font-semibold tracking-wider text-ink-muted uppercase"
+      >
+        {title}
+      </h2>
+      <div className="px-4 py-3 text-[13px] text-ink-muted">{children}</div>
+      <div className="flex justify-end gap-2 border-t border-line px-4 py-3">
+        <Button onClick={onCancel} disabled={busy} autoFocus>
+          Cancel
+        </Button>
+        <Button variant="danger" onClick={onConfirm} loading={busy}>
+          {confirmLabel}
+        </Button>
       </div>
     </dialog>
   )
