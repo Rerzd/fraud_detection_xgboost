@@ -16,7 +16,7 @@ export function Th({ align = 'left', children, className = '', ...props }) {
   return (
     <th
       scope="col"
-      className={`sticky top-0 z-10 h-8 border-b border-line-strong bg-subtle px-3 text-[11px] font-semibold tracking-wider whitespace-nowrap text-ink-muted uppercase ${
+      className={`sticky top-0 z-10 h-8 border-b border-line-strong bg-subtle px-2 md:px-3 text-[11px] font-semibold tracking-wider whitespace-nowrap text-ink-muted uppercase ${
         align === 'right' ? 'text-right' : 'text-left'
       } ${className}`}
       {...props}
@@ -30,7 +30,7 @@ export function Th({ align = 'left', children, className = '', ...props }) {
 export function Td({ numeric = false, mono = false, children, className = '', ...props }) {
   return (
     <td
-      className={`h-9 border-b border-line px-3 ${numeric ? 'text-right font-mono' : ''} ${
+      className={`h-9 border-b border-line px-2 md:px-3 ${numeric ? 'text-right font-mono' : ''} ${
         mono && !numeric ? 'font-mono' : ''
       } ${className}`}
       {...props}
@@ -40,10 +40,12 @@ export function Td({ numeric = false, mono = false, children, className = '', ..
   )
 }
 
-/** Zebra rows; a selected row takes the brand tint instead. */
-export function Tr({ selected = false, className = '', children, ...props }) {
+const ROW_TONES = { selected: 'bg-brand-50', warning: 'bg-risk-review-bg' }
+
+/** Zebra rows; a `tone` ('selected' or 'warning') replaces the zebra with a solid tint. */
+export function Tr({ tone, className = '', children, ...props }) {
   return (
-    <tr className={`${selected ? 'bg-brand-50' : 'even:bg-subtle/60'} ${className}`} {...props}>
+    <tr className={`${tone ? ROW_TONES[tone] : 'even:bg-subtle/60'} ${className}`} {...props}>
       {children}
     </tr>
   )
