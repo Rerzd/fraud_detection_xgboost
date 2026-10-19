@@ -39,15 +39,17 @@ def upload(client, text: str, name: str = "batch.csv"):
 
 
 @pytest.fixture
-def make_client(tmp_path, monkeypatch):
-    """Start the app with env overrides and a fresh temporary SQLite file."""
+def make_client(tmp_path):
+    """Start the app with explicit settings and a fresh temporary SQLite file.
+
+    Overrides are `Settings` fields, e.g. `make_client(batch_max_rows=2)`. `.env` is ignored so a
+    developer's local file cannot change test results.
+    """
     clients = []
 
-    def factory(**env: str) -> TestClient:
-        monkeypatch.setenv("DB_PATH", str(tmp_path / "test.db"))
-        for key, value in env.items():
-            monkeypatch.setenv(key, value)
-        c = TestClient(create_app())
+    def factory(**overrides) -> TestClient:
+        settings = Settings(_env_file=None, db_path=tmp_path / "test.db", **overrides)
+        c = TestClient(create_app(settings))
         c.__enter__()
         clients.append(c)
         return c
@@ -65,7 +67,7 @@ def client(make_client):
 @pytest.fixture(scope="session")
 def model() -> FraudModel:
     """The real model artifact, loaded once for the whole run."""
-    settings = Settings()
+    settings = Settings(_env_file=None)
     return FraudModel.load(settings.model_path, settings.model_version)
 
 
