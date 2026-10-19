@@ -7,7 +7,7 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "concurrently --kill-others --names api,web --prefix-colors blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
-    "dev:api": "node scripts/py.mjs -m uvicorn app.main:app --app-dir backend --reload --reload-dir backend/app --port 8000",
+    "dev:api": "node scripts/py.mjs -m uvicorn app.main:app --app-dir backend --reload --reload-dir backend/app --port 8000 --no-access-log",
     "dev:web": "npm --prefix frontend run dev",
     "test": "npm run test:api && npm run test:web",
     "test:api": "node scripts/py.mjs -m pytest backend/tests -q",
