@@ -1,101 +1,69 @@
-import { RISK, formatProbability, formatRawProbability } from '../../lib/format'
+import { useState } from 'react'
+import Callout from '../ui/Callout'
 import EmptyState from '../ui/EmptyState'
-import Icon from '../ui/Icon'
-import RiskBadge from '../ui/RiskBadge'
-import ContributionChart from './ContributionChart'
-import FeatureTable from './FeatureTable'
-import RiskMeter from './RiskMeter'
+import Panel from '../ui/Panel'
+import Tabs, { TabPanel } from '../ui/Tabs'
+import DecisionPanel from './DecisionPanel'
+import FeaturesTable from './FeaturesTable'
+import RequestResponse from './RequestResponse'
+import ScoreBreakdown from './ScoreBreakdown'
+import SignalsList from './SignalsList'
 
-function Section({ title, aside, children }) {
-  return (
-    <section className="border-t border-line pt-5">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-medium text-fg">{title}</h3>
-        {aside && <span className="text-[11px] text-ink-faint">{aside}</span>}
-      </div>
-      {children}
-    </section>
-  )
-}
+const TABS = [
+  { id: 'breakdown', label: 'Score breakdown' },
+  { id: 'features', label: 'Engineered features' },
+  { id: 'signals', label: 'Signals' },
+  { id: 'http', label: 'Request / Response' },
+]
 
-function Score({ result, thresholds }) {
-  const risk = RISK[result.risk_level]
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs text-muted">Fraud probability</p>
-          <p className={`font-mono text-5xl font-medium tracking-tight tabular ${risk.text}`}>
-            {formatProbability(result.probability)}
-          </p>
-          <p className="mt-1 font-mono text-[11px] text-ink-faint">p = {formatRawProbability(result.probability)}</p>
-        </div>
-        <div className="flex flex-col items-start gap-2 sm:items-end">
-          <RiskBadge level={result.risk_level} size="md" />
-          <p className="text-sm text-fg">{risk.decision}</p>
-        </div>
-      </div>
-      <RiskMeter
-        probability={result.probability}
-        level={result.risk_level}
-        reviewThreshold={thresholds.review}
-        fraudThreshold={thresholds.fraud}
-      />
-    </div>
-  )
-}
+/** Right-hand side of the page: empty state, error, or the decision plus the analysis tabs. */
+export default function ResultPanel({ run, thresholds, error, loading }) {
+  const [tab, setTab] = useState('breakdown')
 
-export default function ResultPanel({ result, raw, thresholds, error, loading }) {
   if (error) {
     return (
-      <div className="flex items-start gap-3 rounded-lg border border-risk-high/30 bg-risk-high/5 p-4 text-sm" role="alert">
-        <Icon name="alert" className="mt-0.5 size-4 shrink-0 text-risk-high" />
-        <div>
-          <p className="font-medium text-fg">The transaction could not be scored</p>
-          <p className="mt-1 text-muted">{error}</p>
-        </div>
-      </div>
+      <Panel title="Result">
+        <Callout tone="danger" title="The test case could not be scored">
+          {error}
+        </Callout>
+      </Panel>
     )
   }
 
-  if (!result) {
+  if (!run) {
     return (
-      <EmptyState icon="pulse" title="No transaction scored yet">
-        Fill in the form or load one of the examples, then run the analysis. You will see the probability, the
-        decision, and which features pushed the score.
-      </EmptyState>
+      <Panel title="Result">
+        <EmptyState title="No test run yet">Fill the case or load a fixture, then Run test.</EmptyState>
+      </Panel>
     )
   }
 
+  const { result, request } = run
   return (
-    <div className={`space-y-6 transition-opacity ${loading ? 'opacity-50' : ''}`} aria-busy={loading}>
-      <Score result={result} thresholds={thresholds} />
-
-      <Section title="Why this score" aside="Top 6 contributions">
-        <ContributionChart explanation={result.explanation} />
-      </Section>
-
-      <Section title="Engineered features" aside="What the model received">
-        <FeatureTable features={result.features} raw={raw} />
-      </Section>
-
-      <Section title="Signals" aside="Descriptive, not model reasoning">
-        {result.signals.length ? (
-          <ul className="space-y-2">
-            {result.signals.map((s) => (
-              <li key={s} className="flex gap-2.5 text-xs text-muted">
-                <span className="mt-1.5 size-1 shrink-0 rounded-full bg-ink-faint" aria-hidden="true" />
-                {s}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-xs text-ink-faint">No notable patterns in the raw balances.</p>
-        )}
-        <p className="mt-3 text-[11px] text-ink-faint">
-          Rule-based observations about the input. They are not used by the model and do not explain the score.
-        </p>
-      </Section>
+    <div className={`space-y-4 transition-opacity ${loading ? 'opacity-50' : ''}`} aria-busy={loading}>
+      <DecisionPanel run={run} thresholds={thresholds} />
+      <Panel flush>
+        <Tabs
+          tabs={TABS}
+          value={tab}
+          onChange={setTab}
+          label="Result details"
+          idPrefix="result"
+          className="rounded-t-[3px] bg-subtle px-2"
+        />
+        <TabPanel idPrefix="result" id="breakdown" value={tab} className="px-4 py-3">
+          <ScoreBreakdown explanation={result.explanation} />
+        </TabPanel>
+        <TabPanel idPrefix="result" id="features" value={tab} className="px-4 py-3">
+          <FeaturesTable features={result.features} raw={request} />
+        </TabPanel>
+        <TabPanel idPrefix="result" id="signals" value={tab} className="px-4 py-3">
+          <SignalsList signals={result.signals} />
+        </TabPanel>
+        <TabPanel idPrefix="result" id="http" value={tab} className="px-4 py-3">
+          <RequestResponse request={request} response={result} />
+        </TabPanel>
+      </Panel>
     </div>
   )
 }

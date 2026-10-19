@@ -1,18 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { getExamples, predict } from '../../api'
+import { caseId } from '../../lib/testcase'
 import { EMPTY_FORM, toFormValues, validateTransaction } from '../../lib/validation'
 import { Page } from '../shell/PageHeader'
-import Panel from '../ui/Panel'
 import ResultPanel from './ResultPanel'
-import TransactionForm from './TransactionForm'
+import TestCaseForm from './TestCaseForm'
 
 export default function AnalyzeTab({ thresholds, online }) {
   const [values, setValues] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState(false)
   const [examples, setExamples] = useState([])
-  const [result, setResult] = useState(null)
-  const [submitted, setSubmitted] = useState(null)
+  const [run, setRun] = useState(null)
   const [apiError, setApiError] = useState(null)
   const [loading, setLoading] = useState(false)
   const resultRef = useRef(null)
@@ -36,7 +35,14 @@ export default function AnalyzeTab({ thresholds, online }) {
     setTouched(false)
   }
 
+  function reset() {
+    setValues(EMPTY_FORM)
+    setErrors({})
+    setTouched(false)
+  }
+
   async function submit() {
+    if (loading) return
     const { errors: found, transaction } = validateTransaction(values)
     setTouched(true)
     setErrors(found)
@@ -45,12 +51,9 @@ export default function AnalyzeTab({ thresholds, online }) {
     setLoading(true)
     setApiError(null)
     try {
-      setResult(await predict(transaction))
-      setSubmitted(transaction)
-      // On narrow screens the result sits below the form; bring it into view.
-      if (window.matchMedia('(max-width: 1023px)').matches) {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
+      const result = await predict(transaction)
+      const at = new Date()
+      setRun({ result, request: transaction, caseId: caseId(at), at })
     } catch (err) {
       setApiError(err.message)
     } finally {
@@ -58,33 +61,44 @@ export default function AnalyzeTab({ thresholds, online }) {
     }
   }
 
+  // On narrow screens the result sits below the form. Scroll after it has rendered: before that the
+  // page is still short, and the browser would stop at the old end of the document.
+  useEffect(() => {
+    if (run && window.matchMedia('(max-width: 1023px)').matches) {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [run])
+
+  // Ctrl/Cmd+Enter runs the test from anywhere on the page.
+  const onShortcut = useEffectEvent((event) => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault()
+      submit()
+    }
+  })
+  useEffect(() => {
+    window.addEventListener('keydown', onShortcut)
+    return () => window.removeEventListener('keydown', onShortcut)
+  }, [])
+
   // Thresholds come from /model/info; until it loads, fall back to the threshold in the response.
-  const activeThresholds = thresholds ?? { review: null, fraud: result?.threshold }
+  const activeThresholds = thresholds ?? { review: null, fraud: run?.result.threshold }
 
   return (
     <Page id="analyze">
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-        <Panel title="Transaction" description="Raw PaySim fields. Derived features are computed by the backend.">
-          <TransactionForm
-            values={values}
-            errors={errors}
-            onChange={change}
-            onSubmit={submit}
-            loading={loading}
-            examples={examples}
-            onExample={loadExample}
-          />
-        </Panel>
-        <div ref={resultRef} className="scroll-mt-4">
-          <Panel title="Result" className="min-h-80">
-            <ResultPanel
-              result={result}
-              raw={submitted}
-              thresholds={activeThresholds}
-              error={apiError}
-              loading={loading}
-            />
-          </Panel>
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <TestCaseForm
+          values={values}
+          errors={errors}
+          onChange={change}
+          onSubmit={submit}
+          onReset={reset}
+          loading={loading}
+          examples={examples}
+          onExample={loadExample}
+        />
+        <div ref={resultRef} className="scroll-mt-16">
+          <ResultPanel run={run} thresholds={activeThresholds} error={apiError} loading={loading} />
         </div>
       </div>
     </Page>
