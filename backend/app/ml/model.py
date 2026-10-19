@@ -1,5 +1,6 @@
 """Model loading and scoring."""
 
+import hashlib
 import warnings
 from pathlib import Path
 
@@ -18,10 +19,19 @@ def risk_level(probability: float, review_threshold: float, fraud_threshold: flo
     return "low"
 
 
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 class FraudModel:
-    def __init__(self, pipeline: Pipeline, version: str):
+    def __init__(self, pipeline: Pipeline, version: str, sha256: str = ""):
         self.pipeline = pipeline
         self.version = version
+        self.sha256 = sha256  # of the pickle file: ties every score to the exact artifact
 
     @classmethod
     def load(cls, path: Path, version: str) -> "FraudModel":
@@ -30,7 +40,7 @@ class FraudModel:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", InconsistentVersionWarning)
             pipeline = joblib.load(path)
-        return cls(pipeline, version)
+        return cls(pipeline, version, file_sha256(path))
 
     def predict_proba(self, features: pd.DataFrame) -> list[float]:
         """Probability of the fraud class for each row."""
