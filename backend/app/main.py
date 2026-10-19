@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import batches, health, model, predictions, scoring
 from app.core.config import Settings, get_settings
+from app.core.logging import configure_logging, kv
+from app.core.middleware import PROCESS_TIME_HEADER, REQUEST_ID_HEADER, RequestContextMiddleware
 from app.db.session import init_db
 from app.ml.model import FraudModel
 
@@ -18,11 +20,16 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
     try:
-        app.state.model = FraudModel.load(settings.model_path, settings.model_version)
+        model = FraudModel.load(settings.model_path, settings.model_version)
+        app.state.model = model
+        logger.info(
+            kv(event="model_loaded", path=settings.model_path, version=model.version, sha256=model.sha256)
+        )
     except Exception:
-        logger.exception("Could not load model from %s", settings.model_path)
+        logger.exception(kv(event="model_load_failed", path=settings.model_path))
         app.state.model = None
     engine, app.state.sessionmaker = init_db(settings.db_path)
+    logger.info(kv(event="database_ready", path=settings.db_path))
     yield
     engine.dispose()
 
@@ -30,6 +37,7 @@ async def lifespan(app: FastAPI):
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the application. Tests pass their own `settings`; the server uses the environment."""
     settings = settings or get_settings()
+    configure_logging(settings.log_level)
     app = FastAPI(title="Fraud Detection API", version="1.0.0", lifespan=lifespan)
     app.state.settings = settings
     app.add_middleware(
@@ -37,7 +45,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_origins=settings.cors_origins,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=[REQUEST_ID_HEADER, PROCESS_TIME_HEADER],
     )
+    app.add_middleware(RequestContextMiddleware)
     for router in (health.router, model.router, scoring.router, batches.router, predictions.router):
         app.include_router(router)
     return app
