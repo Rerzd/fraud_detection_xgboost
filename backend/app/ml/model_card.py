@@ -4,8 +4,8 @@ Metrics are copied from the printed outputs of backend/fraud_detection_2.ipynb.
 ROC-AUC was computed in the notebook but never printed, so it is not reported.
 """
 
-from app.config import Settings
-from app.model import FraudModel
+from app.core.config import Settings
+from app.ml.model import FraudModel
 
 FEATURE_DESCRIPTIONS = {
     "step": "Simulation hour (1 step = 1 hour over 30 days); not a real timestamp.",

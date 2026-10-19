@@ -1,7 +1,8 @@
 """Sample transactions for the UI.
 
-Each `label` is the risk level the model actually assigns (checked in tests/test_examples.py);
-they were chosen by scoring candidates, not by hand-assigning labels.
+Each `label` is the risk level the model actually assigns (checked in
+tests/api/test_explainability.py); they were chosen by scoring candidates, not by hand-assigning
+labels.
 """
 
 EXAMPLES = [

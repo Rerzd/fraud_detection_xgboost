@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.db import Prediction
+from app.db.models import Prediction
 
 
 def _to_record(tx: dict, probability: float, risk_level: str, source: str, batch_id: str | None):
