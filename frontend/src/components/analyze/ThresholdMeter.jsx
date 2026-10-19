@@ -3,7 +3,8 @@ const pct = (v) => `${clamp(v) * 100}%`
 
 /**
  * Horizontal 0 to 1 meter: three decision bands, a tick and label at each backend threshold, and a
- * marker at the score. Without a review threshold (model info not loaded yet) it shows two bands.
+ * marker at the score (omitted when there is no `probability`, as on the model card). Without a review
+ * threshold (model info not loaded yet) it shows two bands.
  */
 export default function ThresholdMeter({ probability, reviewThreshold, fraudThreshold }) {
   const hasReview = typeof reviewThreshold === 'number' && reviewThreshold < fraudThreshold
@@ -16,6 +17,7 @@ export default function ThresholdMeter({ probability, reviewThreshold, fraudThre
     { id: 'high', label: 'High', from: fraudThreshold, to: 1, color: 'bg-risk-high-line' },
   ]
   const ticks = hasReview ? [review, fraudThreshold] : [fraudThreshold]
+  const scored = typeof probability === 'number'
 
   return (
     <div className="px-1.5">
@@ -31,11 +33,11 @@ export default function ThresholdMeter({ probability, reviewThreshold, fraudThre
         ))}
       </div>
       <div
-        role="meter"
-        aria-label="Fraud probability"
-        aria-valuemin={0}
-        aria-valuemax={1}
-        aria-valuenow={probability}
+        role={scored ? 'meter' : 'img'}
+        aria-label={scored ? 'Fraud probability' : 'Decision bands from 0 to 1'}
+        aria-valuemin={scored ? 0 : undefined}
+        aria-valuemax={scored ? 1 : undefined}
+        aria-valuenow={scored ? probability : undefined}
         className="relative mt-1 h-2.5"
       >
         <div className="absolute inset-0 flex overflow-hidden rounded-sm border border-line-strong">
@@ -43,10 +45,12 @@ export default function ThresholdMeter({ probability, reviewThreshold, fraudThre
             <div key={b.id} className={`${b.color} border-l border-surface first:border-l-0`} style={{ width: pct(b.to - b.from) }} />
           ))}
         </div>
-        <div
-          className="absolute -top-1 -bottom-1 w-[3px] -translate-x-1/2 border-x border-surface bg-ink"
-          style={{ left: pct(probability) }}
-        />
+        {scored && (
+          <div
+            className="absolute -top-1 -bottom-1 w-[3px] -translate-x-1/2 border-x border-surface bg-ink"
+            style={{ left: pct(probability) }}
+          />
+        )}
       </div>
       <div className="relative mt-1.5 h-4 font-mono text-[11px] text-ink-muted">
         <span className="absolute left-0 -translate-x-1/2">0</span>

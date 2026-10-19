@@ -5,7 +5,7 @@ const TONES = {
   low: 'text-risk-low',
 }
 
-// Full class names, so Tailwind can see them. A strip of six or more cells needs a wider screen to fit one row.
+// Full class names, so Tailwind can see them.
 const LAYOUTS = {
   narrow: 'max-lg:[&>*:last-child:nth-child(odd)]:col-span-2 lg:auto-cols-fr lg:grid-flow-col',
   wide: 'max-xl:[&>*:last-child:nth-child(odd)]:col-span-2 xl:auto-cols-fr xl:grid-flow-col',
@@ -13,13 +13,14 @@ const LAYOUTS = {
 
 /**
  * One bordered row divided into cells by 1px lines. Cells: { label, value, hint, tone, title, mono }.
- * Two columns on narrow screens, one column per cell from lg up (xl for six or more cells).
+ * Two columns on narrow screens, one column per cell from lg up. Six or more cells, or `wide` for a
+ * strip that sits in a narrow column, wait for xl.
  */
-export default function SummaryStrip({ cells, className = '' }) {
+export default function SummaryStrip({ cells, wide = cells.length > 5, className = '' }) {
   return (
     <dl
       className={`grid grid-cols-2 gap-px overflow-hidden rounded border border-line-strong bg-line ${
-        cells.length > 5 ? LAYOUTS.wide : LAYOUTS.narrow
+        wide ? LAYOUTS.wide : LAYOUTS.narrow
       } ${className}`}
     >
       {cells.map(({ label, value, hint, tone = 'default', title, mono = true }) => (
@@ -28,7 +29,7 @@ export default function SummaryStrip({ cells, className = '' }) {
           <dd className={`mt-0.5 truncate text-xl font-semibold ${mono ? 'font-mono' : ''} ${TONES[tone]}`}>
             {value}
           </dd>
-          {hint && <p className="truncate text-xs text-ink-faint">{hint}</p>}
+          {hint && <p className="text-xs text-ink-faint lg:truncate">{hint}</p>}
         </div>
       ))}
     </dl>
