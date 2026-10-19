@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   formatAmount,
+  formatClock,
   formatDateTime,
   formatPercent,
   formatProbability,
@@ -71,5 +72,12 @@ describe('formatDateTime', () => {
   it('treats timestamps without a zone as UTC', () => {
     expect(formatDateTime('2026-10-17T04:21:43.629432')).toBe(formatDateTime('2026-10-17T04:21:43.629432Z'))
     expect(formatDateTime('2026-10-17T04:21:43+00:00')).toBe(formatDateTime('2026-10-17T04:21:43Z'))
+  })
+})
+
+describe('formatClock', () => {
+  it('shows a 24-hour time of day', () => {
+    expect(formatClock(new Date(2026, 9, 18, 15, 4, 9))).toBe('15:04:09')
+    expect(formatClock(new Date(2026, 9, 18, 0, 0, 0))).toBe('00:00:00')
   })
 })

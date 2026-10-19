@@ -71,5 +71,10 @@ export function formatDateTime(iso) {
   })
 }
 
+/** Wall-clock time of day (24 hours), for run timestamps. */
+export function formatClock(date) {
+  return date.toLocaleTimeString('en-GB', { hour12: false })
+}
+
 export const TYPE_LABELS = { TRANSFER: 'Transfer', CASH_OUT: 'Cash out' }
 export const TYPE_CODES = { 0: 'TRANSFER', 1: 'CASH_OUT' }
