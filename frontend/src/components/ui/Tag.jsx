@@ -8,7 +8,7 @@ const TONES = {
 export default function Tag({ tone = 'neutral', children, className = '' }) {
   return (
     <span
-      className={`inline-flex h-5 items-center rounded-sm border px-1.5 font-mono text-[11px] whitespace-nowrap ${TONES[tone]} ${className}`}
+      className={`inline-flex h-5 items-center rounded-xs border px-1.5 font-mono text-[11px] whitespace-nowrap ${TONES[tone]} ${className}`}
     >
       {children}
     </span>

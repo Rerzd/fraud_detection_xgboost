@@ -13,7 +13,7 @@ export default function RiskBadge({ level, size = 'sm' }) {
   const s = SIZES[size]
   return (
     <span
-      className={`inline-flex items-center rounded-sm border font-semibold tracking-wide whitespace-nowrap uppercase ${s.box} ${risk.badge}`}
+      className={`inline-flex items-center rounded-xs border font-semibold tracking-wide whitespace-nowrap uppercase ${s.box} ${risk.badge}`}
     >
       <Icon name={ICONS[level]} className={s.icon} />
       {risk.label}

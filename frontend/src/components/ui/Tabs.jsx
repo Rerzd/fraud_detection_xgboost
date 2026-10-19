@@ -40,7 +40,7 @@ export default function Tabs({ tabs, value, onChange, label, idPrefix = 'tabs', 
             {tab.label}
             {tab.count !== undefined && (
               <span
-                className={`rounded-sm px-1 font-mono text-[11px] ${
+                className={`rounded-xs px-1 font-mono text-[11px] ${
                   selected ? 'bg-brand-50 text-brand-700' : 'bg-subtle text-ink-muted'
                 }`}
               >

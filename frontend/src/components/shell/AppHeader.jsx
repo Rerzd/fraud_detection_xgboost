@@ -20,7 +20,7 @@ export default function AppHeader({ status, modelVersion }) {
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-3">
-        <span className="hidden h-5 items-center rounded-sm border border-white/40 px-1.5 font-mono text-[11px] tracking-wider uppercase sm:inline-flex">
+        <span className="hidden h-5 items-center rounded-xs border border-white/40 px-1.5 font-mono text-[11px] tracking-wider uppercase sm:inline-flex">
           Local
         </span>
         <div className="flex items-center gap-2 text-xs" role="status" aria-live="polite">

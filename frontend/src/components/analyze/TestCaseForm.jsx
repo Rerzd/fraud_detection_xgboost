@@ -16,7 +16,7 @@ function Section({ number, title, children }) {
   return (
     <section aria-label={title} className="border-b border-line px-4 py-3">
       <h3 className="mb-2.5 flex items-center gap-2 text-[11px] font-semibold tracking-wider text-ink-muted uppercase">
-        <span className="grid size-5 place-items-center rounded-sm border border-line-strong bg-subtle font-mono text-ink-muted">
+        <span className="grid size-5 place-items-center rounded-xs border border-line-strong bg-subtle font-mono text-ink-muted">
           {number}
         </span>
         {title}

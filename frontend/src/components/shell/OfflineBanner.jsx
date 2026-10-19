@@ -24,7 +24,7 @@ export default function OfflineBanner({ onRetry }) {
           <span className="font-semibold text-risk-review">API unreachable at </span>
           <span className="font-mono text-ink">{API_URL}</span>
           <span className="font-semibold text-risk-review">.</span> Start it from the repository root with{' '}
-          <code className="rounded-sm border border-risk-review-line bg-surface px-1.5 py-0.5 font-mono text-xs text-ink">
+          <code className="rounded-xs border border-risk-review-line bg-surface px-1.5 py-0.5 font-mono text-xs text-ink">
             npm run dev
           </code>
           . The page also retries every few seconds.
