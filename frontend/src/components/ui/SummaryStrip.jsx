@@ -5,14 +5,22 @@ const TONES = {
   low: 'text-risk-low',
 }
 
+// Full class names, so Tailwind can see them. A strip of six or more cells needs a wider screen to fit one row.
+const LAYOUTS = {
+  narrow: 'max-lg:[&>*:last-child:nth-child(odd)]:col-span-2 lg:auto-cols-fr lg:grid-flow-col',
+  wide: 'max-xl:[&>*:last-child:nth-child(odd)]:col-span-2 xl:auto-cols-fr xl:grid-flow-col',
+}
+
 /**
  * One bordered row divided into cells by 1px lines. Cells: { label, value, hint, tone, title, mono }.
- * Two columns on narrow screens, one column per cell from md up.
+ * Two columns on narrow screens, one column per cell from lg up (xl for six or more cells).
  */
 export default function SummaryStrip({ cells, className = '' }) {
   return (
     <dl
-      className={`grid grid-cols-2 gap-px overflow-hidden rounded border border-line-strong bg-line max-md:[&>*:last-child:nth-child(odd)]:col-span-2 md:auto-cols-fr md:grid-flow-col ${className}`}
+      className={`grid grid-cols-2 gap-px overflow-hidden rounded border border-line-strong bg-line ${
+        cells.length > 5 ? LAYOUTS.wide : LAYOUTS.narrow
+      } ${className}`}
     >
       {cells.map(({ label, value, hint, tone = 'default', title, mono = true }) => (
         <div key={label} className="min-w-0 bg-surface px-4 py-2.5" title={title}>
