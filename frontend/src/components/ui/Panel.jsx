@@ -11,7 +11,6 @@ const TONES = {
 export default function Panel({
   id,
   title,
-  description,
   meta,
   actions,
   tone = 'default',
@@ -27,10 +26,7 @@ export default function Panel({
         <header
           className={`flex min-h-9 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-t-[3px] border-b px-4 py-2 ${t.header}`}
         >
-          <div className="min-w-0">
-            {title && <h2 className={`text-xs font-semibold tracking-wider uppercase ${t.title}`}>{title}</h2>}
-            {description && <p className="text-xs text-ink-faint">{description}</p>}
-          </div>
+          {title && <h2 className={`min-w-0 text-xs font-semibold tracking-wider uppercase ${t.title}`}>{title}</h2>}
           {(meta || actions) && (
             <div className="flex shrink-0 items-center gap-2 text-xs text-ink-faint">
               {meta}

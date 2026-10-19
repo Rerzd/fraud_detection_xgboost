@@ -24,7 +24,7 @@ export default function AppHeader({ status, modelVersion }) {
           Local
         </span>
         <div className="flex items-center gap-2 text-xs" role="status" aria-live="polite">
-          <span className={`size-2 rounded-full ${s.dot}`} aria-hidden="true" />
+          <span className={`size-2 rounded ${s.dot}`} aria-hidden="true" />
           {s.label}
         </div>
       </div>

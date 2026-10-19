@@ -5,21 +5,18 @@ export const RISK = {
     label: 'Low risk',
     decision: 'Approve',
     text: 'text-risk-low',
-    bg: 'bg-risk-low',
     badge: 'border-risk-low-line bg-risk-low-bg text-risk-low',
   },
   review: {
     label: 'Review',
     decision: 'Send to manual review',
     text: 'text-risk-review',
-    bg: 'bg-risk-review',
     badge: 'border-risk-review-line bg-risk-review-bg text-risk-review',
   },
   high: {
     label: 'High risk',
     decision: 'Flag for fraud',
     text: 'text-risk-high',
-    bg: 'bg-risk-high',
     badge: 'border-risk-high-line bg-risk-high-bg text-risk-high',
   },
 }
@@ -81,5 +78,3 @@ export const formatUtc = (iso) => parseUtc(iso).toISOString()
 export function formatClock(date) {
   return date.toLocaleTimeString('en-GB', { hour12: false })
 }
-
-export const TYPE_CODES = { 0: 'TRANSFER', 1: 'CASH_OUT' }

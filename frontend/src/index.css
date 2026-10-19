@@ -40,16 +40,6 @@
 
   /* Explanation bars pushing away from fraud */
   --color-contrib-away: #4a6275;
-
-  /* Legacy names from the previous theme, mapped onto the new palette so screens not yet
-     redesigned stay readable. Removed once every screen uses the tokens above. */
-  --color-panel: var(--color-surface);
-  --color-raised: var(--color-subtle);
-  --color-fg: var(--color-ink);
-  --color-muted: var(--color-ink-muted);
-  --color-accent: var(--color-brand-700);
-  --color-accent-hover: var(--color-brand-600);
-  --color-accent-soft: var(--color-brand-50);
 }
 
 @layer base {
