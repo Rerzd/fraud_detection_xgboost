@@ -59,22 +59,27 @@ export function formatPercent(ratio, digits = 1) {
   return `${(ratio * 100).toFixed(digits)}%`
 }
 
-export function formatDateTime(iso) {
-  // Backend timestamps are UTC; SQLite drops the offset, so treat naive values as UTC.
+/** Backend timestamps are UTC; SQLite drops the offset, so treat naive values as UTC. */
+function parseUtc(iso) {
   const hasZone = /[zZ]|[+-]\d\d:\d\d$/.test(iso)
-  const date = new Date(hasZone ? iso : `${iso}Z`)
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  return new Date(hasZone ? iso : `${iso}Z`)
 }
+
+const pad = (n) => String(n).padStart(2, '0')
+
+/** Local date and time to the second (yyyy-mm-dd hh:mm:ss, 24 hours), for audit records. */
+export function formatTimestamp(iso) {
+  const d = parseUtc(iso)
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  return `${date} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+/** The same instant in UTC, as ISO 8601. */
+export const formatUtc = (iso) => parseUtc(iso).toISOString()
 
 /** Wall-clock time of day (24 hours), for run timestamps. */
 export function formatClock(date) {
   return date.toLocaleTimeString('en-GB', { hour12: false })
 }
 
-export const TYPE_LABELS = { TRANSFER: 'Transfer', CASH_OUT: 'Cash out' }
 export const TYPE_CODES = { 0: 'TRANSFER', 1: 'CASH_OUT' }

@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   formatAmount,
   formatClock,
-  formatDateTime,
   formatPercent,
   formatProbability,
   formatRawProbability,
   formatSigned,
+  formatTimestamp,
+  formatUtc,
   RISK,
   RISK_LEVELS,
 } from './format'
@@ -68,10 +69,22 @@ describe('formatAmount and formatPercent', () => {
   })
 })
 
-describe('formatDateTime', () => {
+describe('formatTimestamp', () => {
   it('treats timestamps without a zone as UTC', () => {
-    expect(formatDateTime('2026-10-17T04:21:43.629432')).toBe(formatDateTime('2026-10-17T04:21:43.629432Z'))
-    expect(formatDateTime('2026-10-17T04:21:43+00:00')).toBe(formatDateTime('2026-10-17T04:21:43Z'))
+    expect(formatTimestamp('2026-10-17T04:21:43.629432')).toBe(formatTimestamp('2026-10-17T04:21:43.629432Z'))
+    expect(formatTimestamp('2026-10-17T04:21:43+00:00')).toBe(formatTimestamp('2026-10-17T04:21:43Z'))
+  })
+
+  it('shows local date and 24-hour time to the second', () => {
+    const local = new Date(2026, 9, 17, 4, 21, 43)
+    expect(formatTimestamp(local.toISOString())).toBe('2026-10-17 04:21:43')
+  })
+})
+
+describe('formatUtc', () => {
+  it('returns the same instant as an ISO string in UTC', () => {
+    expect(formatUtc('2026-10-17T04:21:43.629432')).toBe('2026-10-17T04:21:43.629Z')
+    expect(formatUtc('2026-10-17T04:21:43+00:00')).toBe('2026-10-17T04:21:43.000Z')
   })
 })
 
