@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, request } from './api'
+import { API_BASE, API_BASE_PATH, ApiError, request } from './api'
 
 function stubFetch(response) {
   vi.stubGlobal('fetch', vi.fn(response))
@@ -11,6 +11,14 @@ const jsonResponse = (status, body) =>
 afterEach(() => vi.unstubAllGlobals())
 
 describe('request', () => {
+  it('sends every call under the /api/v1 base path', async () => {
+    stubFetch(() => jsonResponse(200, {}))
+    await request('/predict', { method: 'POST' })
+    expect(API_BASE_PATH).toBe('/api/v1')
+    expect(API_BASE.endsWith('/api/v1')).toBe(true)
+    expect(fetch).toHaveBeenCalledWith(`${API_BASE}/predict`, { method: 'POST' })
+  })
+
   it('returns the parsed body of a successful response', async () => {
     stubFetch(() => jsonResponse(200, { status: 'ok' }))
     expect(await request('/health')).toEqual({ status: 'ok' })

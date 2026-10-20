@@ -1,5 +1,9 @@
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
+// Every endpoint lives under this path; VITE_API_URL is only the origin.
+export const API_BASE_PATH = '/api/v1'
+export const API_BASE = `${API_URL}${API_BASE_PATH}`
+
 export class ApiError extends Error {
   constructor(message, status) {
     super(message)
@@ -15,7 +19,7 @@ function errorMessage(body, status) {
 export async function request(path, options = {}) {
   let response
   try {
-    response = await fetch(`${API_URL}${path}`, options)
+    response = await fetch(`${API_BASE}${path}`, options)
   } catch {
     throw new ApiError('Cannot reach the backend. Is it running?', 0)
   }
