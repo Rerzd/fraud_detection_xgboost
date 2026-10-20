@@ -1,0 +1,27 @@
+# Tooling for the backend: ruff (lint and format), pytest and coverage.
+# Run from the repository root with `npm run lint:py`, `npm run format:py` and `npm run test:api`.
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+# `app` is the package; tests import `conftest` through pytest's pythonpath.
+src = [".", "tests"]
+# The training notebook is a record of how the model was built: never reformat or lint it.
+extend-exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import order
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplifications
+]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+pythonpath = [".", "tests"]
+testpaths = ["tests"]
