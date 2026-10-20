@@ -23,7 +23,7 @@ def score_transaction(
     features = build_features([raw])
     probability = model.predict_proba(features)[0]
     level = risk_level(probability, settings.review_threshold, settings.fraud_threshold)
-    repository.insert(
+    record = repository.insert(
         session,
         raw,
         probability,
@@ -33,6 +33,7 @@ def score_transaction(
         request_id=request_id,
     )
     return PredictionOut(
+        id=record.id,
         model_version=model.version,
         model_hash=model.short_hash,
         probability=probability,

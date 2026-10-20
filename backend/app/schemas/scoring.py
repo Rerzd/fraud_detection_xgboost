@@ -59,6 +59,7 @@ class Explanation(BaseModel):
 
 # What the API returns for NOTEBOOK_FRAUD_TRANSACTION (xgb-paysim-v1); digits rounded for display.
 _PREDICTION_EXAMPLE = {
+    "id": 1,
     "model_version": "xgb-paysim-v1",
     "model_hash": "cbf91feebec3",
     "probability": 0.99999988,
@@ -102,6 +103,7 @@ _PREDICTION_EXAMPLE = {
 class PredictionOut(BaseModel):
     model_config = ConfigDict(json_schema_extra={"examples": [_PREDICTION_EXAMPLE]})
 
+    id: int = Field(description="Id of the stored prediction, see `/predictions/{id}`")
     model_version: str = Field(description="Configured label of the model that scored this")
     model_hash: str = Field(description="First 12 hex characters of the model file's sha256")
     probability: float

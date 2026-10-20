@@ -30,6 +30,14 @@ def test_zero_amount_is_rejected(client):
     assert response.status_code == 422
 
 
+def test_the_response_carries_the_id_of_the_stored_prediction(client):
+    first = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()
+    second = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()
+    assert second["id"] == first["id"] + 1
+    stored = client.get(f"/api/v1/predictions/{first['id']}").json()
+    assert stored["probability"] == first["probability"]
+
+
 def test_step_out_of_range_is_rejected(client):
     response = client.post("/api/v1/predict", json={**NOTEBOOK_FRAUD_ROW, "step": 745})
     assert response.status_code == 422

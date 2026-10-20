@@ -93,6 +93,37 @@ def test_the_prediction_example_matches_what_the_model_returns(client, spec):
         assert shown["contribution"] == pytest.approx(real["contribution"], abs=1e-3)
 
 
+def test_listings_are_documented_as_pages(spec):
+    paths = spec["paths"]
+    predictions = paths["/api/v1/predictions"]["get"]["responses"]["200"]["content"]["application/json"]
+    batches = paths["/api/v1/batches"]["get"]["responses"]["200"]["content"]["application/json"]
+    assert predictions["schema"]["$ref"].endswith("Page_PredictionRecord_")
+    assert batches["schema"]["$ref"].endswith("Page_BatchRecord_")
+    page = spec["components"]["schemas"]["Page_PredictionRecord_"]
+    assert set(page["properties"]) == {"items", "total", "limit", "offset"}
+
+
+def test_the_prediction_filters_are_documented(spec):
+    params = {p["name"]: p for p in spec["paths"]["/api/v1/predictions"]["get"]["parameters"]}
+    assert set(params) == {
+        "limit", "offset", "risk_level", "source", "batch_id", "created_from", "created_to"
+    }
+    assert params["limit"]["schema"]["maximum"] == 200
+    assert all(p.get("description") for p in params.values())
+
+
+def test_the_lookup_routes_document_their_404(spec):
+    for path in ("/api/v1/predictions/{prediction_id}", "/api/v1/batches/{batch_id}"):
+        responses = spec["paths"][path]["get"]["responses"]
+        assert {"200", "404", "422"} <= responses.keys()
+        assert error_schema_ref(responses["404"]) == "#/components/schemas/ErrorResponse"
+
+
+def test_the_stored_prediction_id_is_part_of_the_scoring_response(spec):
+    out = spec["components"]["schemas"]["PredictionOut"]
+    assert "id" in out["properties"] and out["examples"][0]["id"] == 1
+
+
 def test_docs_pages_are_served(client):
     assert "swagger" in client.get("/docs").text.lower()
     assert "redoc" in client.get("/redoc").text.lower()

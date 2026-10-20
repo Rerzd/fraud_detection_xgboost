@@ -1,26 +1,25 @@
-"""Stored predictions: history items and store-wide statistics."""
+"""Stored predictions and store-wide statistics."""
 
-from datetime import datetime
-from typing import Literal
+from pydantic import BaseModel, Field
 
-from pydantic import BaseModel
-
-from app.schemas.common import RiskLevel, TransactionType
+from app.schemas.common import RiskLevel, Source, TransactionType, UtcDatetime
 
 
-class HistoryItem(BaseModel):
+class PredictionRecord(BaseModel):
+    """A stored prediction: the raw request, the score and where it came from."""
+
     id: int
-    created_at: datetime
-    source: Literal["single", "batch"]
-    batch_id: str | None
+    created_at: UtcDatetime = Field(description="UTC")
+    source: Source
+    batch_id: str | None = Field(description="The batch the row came from; null for single requests")
     type: TransactionType
     amount: float
     probability: float
     risk_level: RiskLevel
-    payload: dict
+    payload: dict = Field(description="The transaction exactly as it was submitted")
     model_version: str
     model_hash: str
-    request_id: str | None
+    request_id: str | None = Field(description="`X-Request-ID` of the call that stored it")
 
     model_config = {"from_attributes": True}
 
@@ -28,4 +27,4 @@ class HistoryItem(BaseModel):
 class StatsOut(BaseModel):
     total: int
     by_risk: dict[RiskLevel, int]
-    by_source: dict[Literal["single", "batch"], int]
+    by_source: dict[Source, int]

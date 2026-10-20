@@ -1,11 +1,12 @@
-"""Queries over the predictions table."""
+"""Queries over the predictions and batches tables."""
 
 from collections.abc import Sequence
+from datetime import UTC, datetime
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.db.models import Prediction
+from app.db.models import Batch, Prediction
 
 
 def _to_record(
@@ -50,27 +51,98 @@ def insert(
     return record
 
 
-def bulk_insert(
+def insert_batch(
     session: Session,
-    rows: list[tuple[dict, float, str]],
-    batch_id: str,
     *,
+    batch_id: str,
+    filename: str | None,
+    total_rows: int,
+    scored: int,
+    invalid: int,
+    flagged: int,
+    rows: list[tuple[dict, float, str]],
     model_version: str,
     model_hash: str,
     request_id: str | None = None,
-) -> None:
+) -> Batch:
+    """Store a batch and its scored rows in one transaction."""
+    batch = Batch(
+        id=batch_id,
+        filename=filename,
+        total_rows=total_rows,
+        scored=scored,
+        invalid=invalid,
+        flagged=flagged,
+        model_version=model_version,
+        model_hash=model_hash,
+    )
+    session.add(batch)
+    session.flush()  # the batch row must exist before predictions point at it
     session.add_all(
         _to_record(tx, p, level, "batch", batch_id, model_version, model_hash, request_id)
         for tx, p, level in rows
     )
     session.commit()
+    return batch
 
 
-def list_recent(session: Session, limit: int, risk_level: str | None = None) -> Sequence[Prediction]:
-    query = select(Prediction).order_by(Prediction.created_at.desc(), Prediction.id.desc()).limit(limit)
+def _utc(moment: datetime) -> datetime:
+    """SQLite stores naive UTC, so compare against naive UTC; a naive input is taken as UTC."""
+    if moment.tzinfo is not None:
+        moment = moment.astimezone(UTC)
+    return moment.replace(tzinfo=None)
+
+
+def list_predictions(
+    session: Session,
+    *,
+    limit: int,
+    offset: int = 0,
+    risk_level: str | None = None,
+    source: str | None = None,
+    batch_id: str | None = None,
+    created_from: datetime | None = None,
+    created_to: datetime | None = None,
+) -> tuple[Sequence[Prediction], int]:
+    """One page of predictions, newest first, and how many match the filters in total."""
+    filters = []
     if risk_level:
-        query = query.where(Prediction.risk_level == risk_level)
-    return session.scalars(query).all()
+        filters.append(Prediction.risk_level == risk_level)
+    if source:
+        filters.append(Prediction.source == source)
+    if batch_id:
+        filters.append(Prediction.batch_id == batch_id)
+    if created_from:
+        filters.append(Prediction.created_at >= _utc(created_from))
+    if created_to:
+        filters.append(Prediction.created_at <= _utc(created_to))
+
+    total = session.scalar(select(func.count()).select_from(Prediction).where(*filters))
+    page = session.scalars(
+        select(Prediction)
+        .where(*filters)
+        .order_by(Prediction.created_at.desc(), Prediction.id.desc())
+        .limit(limit)
+        .offset(offset)
+    ).all()
+    return page, total
+
+
+def get_prediction(session: Session, prediction_id: int) -> Prediction | None:
+    return session.get(Prediction, prediction_id)
+
+
+def list_batches(session: Session, *, limit: int, offset: int = 0) -> tuple[Sequence[Batch], int]:
+    """One page of batches, newest first, and the total number of batches."""
+    total = session.scalar(select(func.count()).select_from(Batch))
+    page = session.scalars(
+        select(Batch).order_by(Batch.created_at.desc(), Batch.id.desc()).limit(limit).offset(offset)
+    ).all()
+    return page, total
+
+
+def get_batch(session: Session, batch_id: str) -> Batch | None:
+    return session.get(Batch, batch_id)
 
 
 def stats(session: Session) -> dict:
@@ -87,7 +159,9 @@ def stats(session: Session) -> dict:
     return {"total": sum(by_risk.values()), "by_risk": by_risk, "by_source": by_source}
 
 
-def clear(session: Session) -> int:
-    deleted = session.execute(delete(Prediction)).rowcount
+def clear(session: Session) -> tuple[int, int]:
+    """Delete every prediction and every batch; returns (predictions, batches) deleted."""
+    predictions = session.execute(delete(Prediction)).rowcount
+    batches = session.execute(delete(Batch)).rowcount
     session.commit()
-    return deleted
+    return predictions, batches

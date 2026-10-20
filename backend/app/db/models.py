@@ -8,14 +8,32 @@ rebuilt on startup (see `app.db.session`), so the stored history is disposable d
 
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, DateTime, Float, Integer, String
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class Base(DeclarativeBase):
     pass
+
+
+class Batch(Base):
+    """One uploaded CSV: what was scored and with which model. Its rows are `Prediction`s."""
+
+    __tablename__ = "batches"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)  # uuid4 hex
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
+    )
+    filename: Mapped[str | None] = mapped_column(String(255))
+    total_rows: Mapped[int] = mapped_column(Integer)  # data rows in the file, valid or not
+    scored: Mapped[int] = mapped_column(Integer)
+    invalid: Mapped[int] = mapped_column(Integer)
+    flagged: Mapped[int] = mapped_column(Integer)  # scored rows at high risk
+    model_version: Mapped[str] = mapped_column(String(64))
+    model_hash: Mapped[str] = mapped_column(String(12))
 
 
 class Prediction(Base):
@@ -26,7 +44,7 @@ class Prediction(Base):
         DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )
     source: Mapped[str] = mapped_column(String(10))  # "single" | "batch"
-    batch_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    batch_id: Mapped[str | None] = mapped_column(ForeignKey("batches.id"), index=True)
     type: Mapped[str] = mapped_column(String(10))
     amount: Mapped[float] = mapped_column(Float)
     probability: Mapped[float] = mapped_column(Float)

@@ -34,6 +34,11 @@ CSV_3_VALID_1_INVALID = "\n".join(
 )
 
 
+def csv_of(valid_rows: int) -> str:
+    """A CSV with this many valid rows (the same ordinary cash-out each time)."""
+    return "\n".join([HEADER, *["CASH_OUT,120,18500,42300,23800,150000,168500"] * valid_rows])
+
+
 def upload(client, text: str, name: str = "batch.csv"):
     """POST a CSV given as text to the batch endpoint."""
     return client.post("/api/v1/predict/batch", files={"file": (name, text.encode(), "text/csv")})

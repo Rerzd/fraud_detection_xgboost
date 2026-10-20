@@ -1,11 +1,30 @@
 """Types and models shared by several routers."""
 
-from typing import Literal
+from datetime import UTC, datetime
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import AfterValidator, BaseModel, Field
 
 TransactionType = Literal["TRANSFER", "CASH_OUT"]
 RiskLevel = Literal["low", "review", "high"]
+Source = Literal["single", "batch"]
+
+
+def _as_utc(value: datetime) -> datetime:
+    """SQLite returns naive datetimes; they are UTC, so say so (serialized with a trailing Z)."""
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
+UtcDatetime = Annotated[datetime, AfterValidator(_as_utc)]
+
+
+class Page[T](BaseModel):
+    """One page of a listing: the items plus where the page sits in the full result."""
+
+    items: list[T]
+    total: int = Field(description="Records matching the filters, across all pages")
+    limit: int = Field(description="Page size that was applied")
+    offset: int = Field(description="Records skipped before this page")
 
 
 class HealthOut(BaseModel):

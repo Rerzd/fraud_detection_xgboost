@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from app.schemas.common import RiskLevel
+from app.schemas.common import RiskLevel, UtcDatetime
 from app.schemas.scoring import TransactionIn
 
 
@@ -31,8 +31,25 @@ class BatchLimits(BaseModel):
     required_columns: list[str]
 
 
+class BatchRecord(BaseModel):
+    """A stored upload: counts and the model that scored it. Its rows are in `/predictions`."""
+
+    id: str
+    created_at: UtcDatetime = Field(description="UTC")
+    filename: str | None
+    total_rows: int = Field(description="Data rows in the file, valid or not")
+    scored: int
+    invalid: int
+    flagged: int = Field(description="Scored rows at high risk")
+    model_version: str
+    model_hash: str
+
+    model_config = {"from_attributes": True}
+
+
 class BatchOut(BaseModel):
     batch_id: str
+    filename: str | None = Field(description="Name of the uploaded file, if the client sent one")
     model_version: str = Field(description="Configured label of the model that scored this file")
     model_hash: str = Field(description="First 12 hex characters of the model file's sha256")
     summary: BatchSummary

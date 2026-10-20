@@ -3,6 +3,7 @@
 import csv
 import io
 import uuid
+from pathlib import PurePath
 
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -54,14 +55,21 @@ def parse_csv(content: bytes, max_rows: int) -> tuple[list[tuple[int, dict]], li
     return valid, errors
 
 
+def _clean_filename(name: str | None) -> str | None:
+    """Only the file's own name, at most 255 characters; None when the client sent none."""
+    cleaned = PurePath((name or "").replace("\\", "/")).name[:255]
+    return cleaned or None
+
+
 def score_batch(
     content: bytes,
     model: FraudModel,
     settings: Settings,
     session: Session,
     request_id: str | None = None,
+    filename: str | None = None,
 ) -> BatchOut:
-    """Score every valid row of an uploaded CSV, store the scored rows and summarise the run.
+    """Score every valid row of an uploaded CSV, store the batch and its rows, summarise the run.
 
     `content` may be read up to `batch_max_bytes + 1` bytes, so an oversized upload is detected
     without reading all of it.
@@ -78,26 +86,33 @@ def score_batch(
             level = risk_level(p, settings.review_threshold, settings.fraud_threshold)
             rows.append({"row": line, **tx, "probability": p, "risk_level": level})
 
-    batch_id = uuid.uuid4().hex
-    if rows:
-        repository.bulk_insert(
-            session,
-            [
-                ({k: r[k] for k in TransactionIn.model_fields}, r["probability"], r["risk_level"])
-                for r in rows
-            ],
-            batch_id,
-            model_version=model.version,
-            model_hash=model.short_hash,
-            request_id=request_id,
-        )
-
     risk_counts = {"low": 0, "review": 0, "high": 0}
     for r in rows:
         risk_counts[r["risk_level"]] += 1
+
+    batch_id = uuid.uuid4().hex
+    filename = _clean_filename(filename)
+    repository.insert_batch(
+        session,
+        batch_id=batch_id,
+        filename=filename,
+        total_rows=len(rows) + len(errors),
+        scored=len(rows),
+        invalid=len(errors),
+        flagged=risk_counts["high"],
+        rows=[
+            ({k: r[k] for k in TransactionIn.model_fields}, r["probability"], r["risk_level"])
+            for r in rows
+        ],
+        model_version=model.version,
+        model_hash=model.short_hash,
+        request_id=request_id,
+    )
+
     rows.sort(key=lambda r: r["probability"], reverse=True)
     return BatchOut(
         batch_id=batch_id,
+        filename=filename,
         model_version=model.version,
         model_hash=model.short_hash,
         summary={

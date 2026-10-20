@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
@@ -38,8 +38,19 @@ def ensure_schema(engine: Engine) -> None:
         conn.exec_driver_sql(f"PRAGMA user_version = {int(SCHEMA_VERSION)}")
 
 
+def create_sqlite_engine(url: str, **kwargs) -> Engine:
+    """An engine that enforces foreign keys, which SQLite ignores unless asked per connection."""
+    engine = create_engine(url, **kwargs)
+
+    @event.listens_for(engine, "connect")
+    def _enforce_foreign_keys(dbapi_connection, _record):
+        dbapi_connection.execute("PRAGMA foreign_keys = ON")
+
+    return engine
+
+
 def init_db(db_path: Path) -> tuple[Engine, sessionmaker]:
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(f"sqlite:///{db_path}")
+    engine = create_sqlite_engine(f"sqlite:///{db_path}")
     ensure_schema(engine)
     return engine, sessionmaker(engine, expire_on_commit=False)

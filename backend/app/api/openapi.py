@@ -45,12 +45,12 @@ TAGS = [
     },
     {
         "name": "batches",
-        "description": "Score a CSV of transactions in one call. Valid rows are stored; invalid rows "
-        "are reported with their line number.",
+        "description": "Score a CSV of transactions in one call, and list the runs so far. Valid rows "
+        "are stored; invalid rows are reported with their line number.",
     },
     {
         "name": "predictions",
-        "description": "The prediction log: every stored score, with filters and statistics.",
+        "description": "The prediction log: every stored score, paginated, with filters and statistics.",
     },
     {"name": "model", "description": "The model card: training setup, metrics, thresholds and limits."},
 ]
@@ -110,6 +110,7 @@ NOT_FOUND = {
     404: _doc(
         "The resource does not exist.",
         prediction=("NOT_FOUND", "Prediction 42 not found.", None),
+        batch=("NOT_FOUND", "Batch 3f9c0d1e5a7b4c2e8d6f1a0b9c8d7e6f not found.", None),
     )
 }
 

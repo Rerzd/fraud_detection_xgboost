@@ -131,5 +131,5 @@ def test_the_app_rebuilds_an_outdated_database_on_startup(tmp_path, engines):
         conn.execute(text("CREATE TABLE predictions (id INTEGER PRIMARY KEY)"))
 
     with TestClient(create_app(Settings(_env_file=None, db_path=db))) as client:
-        assert client.get("/api/v1/predictions").json() == []
+        assert client.get("/api/v1/predictions").json()["items"] == []
         assert client.get("/api/v1/ready").status_code == 200
