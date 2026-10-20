@@ -1,8 +1,10 @@
+import logging
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from conftest import assert_envelope
+from conftest import NOTEBOOK_FRAUD_ROW, assert_envelope
 
 
 def test_health_reports_the_loaded_model(client, model):
@@ -63,3 +65,17 @@ def test_unversioned_paths_no_longer_exist(client, path):
 def test_every_documented_endpoint_is_under_the_version_prefix(client):
     paths = client.get("/openapi.json").json()["paths"]
     assert paths and all(p.startswith("/api/v1/") for p in paths)
+
+
+def test_the_app_still_starts_when_the_model_file_is_missing(make_client, tmp_path, caplog):
+    with caplog.at_level(logging.ERROR, logger="app.main"):
+        client = make_client(model_path=tmp_path / "missing.pkl")
+
+    assert "event=model_load_failed" in " ".join(r.getMessage() for r in caplog.records)
+    assert client.get("/api/v1/health").json()["model_loaded"] is False
+    assert_envelope(client.get("/api/v1/ready"), 503, "NOT_READY")
+    assert_envelope(
+        client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW), 503, "MODEL_UNAVAILABLE"
+    )
+    # Everything that does not need the model keeps working.
+    assert client.get("/api/v1/predictions").status_code == 200
