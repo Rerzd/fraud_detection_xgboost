@@ -47,9 +47,13 @@ export function predictBatch(file) {
   return request('/predict/batch', { method: 'POST', body: form })
 }
 
-export function getHistory({ limit = 50, riskLevel } = {}) {
-  const params = new URLSearchParams({ limit: String(limit) })
-  if (riskLevel) params.set('risk_level', riskLevel)
+/**
+ * One page of the audit log: `{ items, total, limit, offset }`. `filters` uses the API's own query
+ * names (risk_level, source, batch_id, created_from, created_to); empty values are left out.
+ */
+export function getHistory({ limit = 50, offset = 0, filters = {} } = {}) {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  for (const [name, value] of Object.entries(filters)) if (value) params.set(name, value)
   return request(`/predictions?${params}`)
 }
 

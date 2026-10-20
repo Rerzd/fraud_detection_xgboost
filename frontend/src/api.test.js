@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { API_BASE, API_BASE_PATH, ApiError, request } from './api'
+import { API_BASE, API_BASE_PATH, ApiError, getHistory, request } from './api'
 
 function stubFetch(response) {
   vi.stubGlobal('fetch', vi.fn(response))
@@ -56,5 +56,27 @@ describe('request', () => {
     const error = await request('/health').catch((e) => e)
     expect(error.status).toBe(0)
     expect(error.message).toBe('Cannot reach the backend. Is it running?')
+  })
+})
+
+describe('getHistory', () => {
+  const requestedUrl = () => new URL(fetch.mock.calls[0][0])
+
+  it('asks for the first page of 50 by default', async () => {
+    stubFetch(() => jsonResponse(200, { items: [], total: 0, limit: 50, offset: 0 }))
+    const page = await getHistory()
+    expect(page).toEqual({ items: [], total: 0, limit: 50, offset: 0 })
+    expect(requestedUrl().pathname).toBe('/api/v1/predictions')
+    expect(Object.fromEntries(requestedUrl().searchParams)).toEqual({ limit: '50', offset: '0' })
+  })
+
+  it('sends the page and only the filters that have a value', async () => {
+    stubFetch(() => jsonResponse(200, { items: [], total: 0, limit: 25, offset: 50 }))
+    await getHistory({ limit: 25, offset: 50, filters: { risk_level: 'high', source: '', batch_id: undefined } })
+    expect(Object.fromEntries(requestedUrl().searchParams)).toEqual({
+      limit: '25',
+      offset: '50',
+      risk_level: 'high',
+    })
   })
 })
