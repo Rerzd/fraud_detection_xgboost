@@ -1,6 +1,7 @@
 """Logging: standard library only, one line per event, `key=value` fields, UTC timestamps.
 
-2026-10-19T04:12:11Z INFO app.request method=POST path=/predict status=200 duration_ms=12.41 request_id=...
+2026-10-19T04:12:11Z INFO app.request method=POST path=/api/v1/predict status=200
+    duration_ms=12.41 request_id=...   (one physical line; wrapped here)
 """
 
 import json
@@ -27,7 +28,7 @@ def kv(**fields: object) -> str:
 
 
 def configure_logging(level: str) -> None:
-    """Attach one stderr handler to the `app` logger. Safe to call again: it only updates the level."""
+    """Attach one stderr handler to the `app` logger. Calling it again only updates the level."""
     logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(level)
     if any(getattr(h, _HANDLER_MARK, False) for h in logger.handlers):

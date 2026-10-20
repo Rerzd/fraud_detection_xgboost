@@ -19,9 +19,9 @@ the fraud probability with a per-feature explanation, and keeps the result in a 
 `low` (< 0.2, approve), `review` (0.2 to 0.5, send to manual review) and `high` (>= 0.5, flag for
 fraud).
 
-**Versioning.** Every endpoint is under `/api/v1`; a breaking change would be published as `/api/v2`.
-`/api/v1/health` says the process is up, `/api/v1/ready` says it can serve (model loaded, database
-answering).
+**Versioning.** Every endpoint is under `/api/v1`; a breaking change would be published as
+`/api/v2`. `/api/v1/health` says the process is up, `/api/v1/ready` says it can serve (model
+loaded, database answering).
 
 **Traceability.** Each prediction carries `model_version` (the configured label) and `model_hash`
 (the first 12 characters of the sha256 of the model file) and is stored with both, so a score can
@@ -50,13 +50,13 @@ TAGS = [
     },
     {
         "name": "batches",
-        "description": "Score a CSV of transactions in one call, and list the runs so far. Valid rows "
-        "are stored; invalid rows are reported with their line number.",
+        "description": "Score a CSV of transactions in one call, and list the runs so far. "
+        "Valid rows are stored; invalid rows are reported with their line number.",
     },
     {
         "name": "predictions",
-        "description": "The prediction log: every stored score, paginated, with filters, statistics and "
-        "the analyst review of each one.",
+        "description": "The prediction log: every stored score, paginated, with filters, "
+        "statistics and the analyst review of each one.",
     },
     {
         "name": "model",
@@ -82,7 +82,7 @@ def unique_id(route: APIRoute) -> str:
 def _doc(
     description: str, **examples: tuple[str, str, list[dict[str, str]] | None]
 ) -> dict[str, Any]:
-    """An error response in the shared envelope, with one named example per (code, message, details)."""
+    """An error response in the shared envelope, one named example per (code, message, details)."""
     return {
         "model": ErrorResponse,
         "description": description,

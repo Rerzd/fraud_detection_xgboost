@@ -154,9 +154,11 @@ def test_unhandled_exception_is_a_generic_500_that_is_logged(tmp_path, caplog):
     def crash():
         raise RuntimeError("database password is hunter2")
 
-    with TestClient(app, raise_server_exceptions=False) as c:
-        with caplog.at_level(logging.ERROR, logger="app.errors"):
-            response = c.get("/crash", headers={"X-Request-ID": "crash-1"})
+    with (
+        TestClient(app, raise_server_exceptions=False) as c,
+        caplog.at_level(logging.ERROR, logger="app.errors"),
+    ):
+        response = c.get("/crash", headers={"X-Request-ID": "crash-1"})
 
     error = assert_envelope(response, 500, "INTERNAL_ERROR")
     assert error["message"] == "Internal server error."

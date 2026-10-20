@@ -15,7 +15,8 @@ FEATURE_DESCRIPTIONS = {
     "newbalanceOrig": "Origin balance after; NaN when origin is 0 before and after.",
     "oldbalanceDest": "Destination balance before; -1 when destination is 0 before and after.",
     "newbalanceDest": "Destination balance after; -1 when destination is 0 before and after.",
-    "errorbalanceDest": "oldbalanceDest + amount - newbalanceDest (computed after the sentinel rules).",
+    "errorbalanceDest": "oldbalanceDest + amount - newbalanceDest "
+    "(computed after the sentinel rules).",
     "errorbalanceOrig": "newbalanceOrig + amount - oldbalanceOrg (NaN propagates).",
 }
 
@@ -57,8 +58,8 @@ def build_model_card(model: FraudModel, settings: Settings) -> dict:
             "fraud": settings.fraud_threshold,
             "levels": {
                 "low": f"probability < {settings.review_threshold}: approve",
-                "review": f"{settings.review_threshold} <= probability < {settings.fraud_threshold}: "
-                "send to manual review",
+                "review": f"{settings.review_threshold} <= probability "
+                f"< {settings.fraud_threshold}: send to manual review",
                 "high": f"probability >= {settings.fraud_threshold}: flag for fraud "
                 "(the threshold used in the notebook evaluation)",
             },

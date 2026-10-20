@@ -1,4 +1,5 @@
 import pytest
+
 from app.core.errors import NotFoundError, RuleViolationError
 from app.db.models import Prediction
 from app.services.review_service import (

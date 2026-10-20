@@ -29,7 +29,7 @@ def _request_id(scope: Scope) -> str:
 
 
 class RequestContextMiddleware:
-    """Accept or create `X-Request-ID`, expose it on `request.state.request_id`, time the request."""
+    """Accept or create `X-Request-ID` (kept on `request.state.request_id`) and time the request."""
 
     def __init__(self, app: ASGIApp):
         self.app = app

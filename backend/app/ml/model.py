@@ -38,7 +38,7 @@ class FraudModel:
 
     @property
     def short_hash(self) -> str:
-        """First 12 hex characters of the sha256: enough to tell artifacts apart in logs and the UI."""
+        """First 12 hex characters of the sha256: enough to tell artifacts apart in logs/UI."""
         return self.sha256[:SHORT_HASH_LENGTH]
 
     @classmethod

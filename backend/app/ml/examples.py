@@ -24,7 +24,8 @@ EXAMPLES = [
     {
         "id": "cashout-drain",
         "label": "high",
-        "description": "Cash-out empties the origin account but the destination balance does not move.",
+        "description": "Cash-out empties the origin account but the destination balance "
+        "does not move.",
         "transaction": {
             "type": "CASH_OUT",
             "step": 400,

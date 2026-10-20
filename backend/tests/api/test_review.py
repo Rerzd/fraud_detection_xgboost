@@ -205,7 +205,8 @@ def test_stats_follow_the_reviews(client):
         "confirmed_fraud": 4,
         "false_positive": 1,
         "missed_by_model": 1,
-        "observed_precision": 0.75,  # 3 of the 4 flagged records were fraud; the miss is not counted
+        # 3 of the 4 flagged records were fraud; the miss is not counted.
+        "observed_precision": 0.75,
     }
 
 

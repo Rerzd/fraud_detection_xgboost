@@ -16,7 +16,8 @@ class ReviewIn(BaseModel):
     note: str | None = Field(
         default=None,
         max_length=NOTE_MAX_LENGTH,
-        description="Why, in the analyst's words. Required to confirm fraud on a low-risk prediction.",
+        description="Why, in the analyst's words. "
+        "Required to confirm fraud on a low-risk prediction.",
     )
 
     model_config = {
@@ -41,7 +42,8 @@ class ReviewStats(BaseModel):
     confirmed_fraud: int
     false_positive: int
     missed_by_model: int = Field(
-        description="Confirmed frauds the model had scored as low risk (included in `confirmed_fraud`)"
+        description="Confirmed frauds the model had scored as low risk "
+        "(included in `confirmed_fraud`)"
     )
     observed_precision: float | None = Field(
         description="Of the predictions the model flagged (high or review) and an analyst judged, "

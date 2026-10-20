@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.common import RiskLevel, TransactionType
 
-
 NOTEBOOK_FRAUD_TRANSACTION = {
     "type": "TRANSFER",
     "step": 459,
