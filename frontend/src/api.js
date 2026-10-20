@@ -7,16 +7,12 @@ export class ApiError extends Error {
   }
 }
 
+// Every API error has the same body: {"error": {"code", "message", "details", "request_id"}}.
 function errorMessage(body, status) {
-  const detail = body?.detail
-  if (typeof detail === 'string') return detail
-  if (Array.isArray(detail)) {
-    return detail.map((d) => `${d.loc?.slice(1).join('.') || 'request'}: ${d.msg}`).join('; ')
-  }
-  return `Request failed (${status})`
+  return body?.error?.message || `Request failed (${status})`
 }
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   let response
   try {
     response = await fetch(`${API_URL}${path}`, options)
