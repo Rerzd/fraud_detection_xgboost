@@ -1,4 +1,4 @@
-import { API_URL } from '../../api'
+import { API_BASE } from '../../api'
 import useCopy from '../../hooks/useCopy'
 import { buildCurl } from '../../lib/testcase'
 import Button from '../ui/Button'
@@ -6,7 +6,7 @@ import CodeBlock from '../ui/CodeBlock'
 import Icon from '../ui/Icon'
 import Tag from '../ui/Tag'
 
-const ENDPOINT = `${API_URL}/predict`
+const ENDPOINT = `${API_BASE}/predict`
 
 /** The exact request that was sent and the raw response, ready to reproduce with cURL. */
 export default function RequestResponse({ request, response }) {
