@@ -29,8 +29,8 @@ export default function HistoryTab({ online }) {
     if (!online) return
     let cancelled = false
     const riskLevel = filter === 'all' ? undefined : filter
-    Promise.all([getStats(), getHistory({ limit: LIMIT, riskLevel })])
-      .then(([stats, items]) => !cancelled && setData({ key, stats, items, error: null }))
+    Promise.all([getStats(), getHistory({ limit: LIMIT, filters: { risk_level: riskLevel } })])
+      .then(([stats, page]) => !cancelled && setData({ key, stats, items: page.items, error: null }))
       .catch((err) => !cancelled && setData((d) => ({ ...d, key, error: err.message })))
     return () => {
       cancelled = true
