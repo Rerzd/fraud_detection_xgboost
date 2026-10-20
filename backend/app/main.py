@@ -5,9 +5,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
+from app.api import openapi
 from app.api.routes import batches, health, model, predictions, scoring
 from app.core.config import Settings, get_settings
+from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging, kv
 from app.core.middleware import PROCESS_TIME_HEADER, REQUEST_ID_HEADER, RequestContextMiddleware
 from app.db.session import init_db
@@ -38,8 +41,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the application. Tests pass their own `settings`; the server uses the environment."""
     settings = settings or get_settings()
     configure_logging(settings.log_level)
-    app = FastAPI(title="Fraud Detection API", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(
+        title=openapi.TITLE,
+        version=openapi.VERSION,
+        description=openapi.DESCRIPTION,
+        license_info=openapi.LICENSE,
+        openapi_tags=openapi.TAGS,
+        swagger_ui_parameters=openapi.SWAGGER_UI_PARAMETERS,
+        generate_unique_id_function=openapi.unique_id,
+        lifespan=lifespan,
+    )
     app.state.settings = settings
+    register_exception_handlers(app)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -50,6 +63,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestContextMiddleware)
     for router in (health.router, model.router, scoring.router, batches.router, predictions.router):
         app.include_router(router)
+
+    @app.get("/", include_in_schema=False)
+    def root() -> RedirectResponse:
+        return RedirectResponse("/docs")
+
     return app
 
 

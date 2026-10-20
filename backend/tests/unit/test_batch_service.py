@@ -1,6 +1,7 @@
 import pytest
 
-from app.services.batch_service import BatchError, parse_csv
+from app.core.errors import BatchTooLargeError, InvalidCsvError
+from app.services.batch_service import parse_csv
 
 HEADER = "type,step,amount,oldbalanceOrg,newbalanceOrig,oldbalanceDest,newbalanceDest"
 ROW = "TRANSFER,10,100,500,400,0,100"
@@ -42,14 +43,14 @@ def test_valid_rows_come_back_as_plain_dicts():
 
 
 @pytest.mark.parametrize(
-    ("content", "message"),
+    ("content", "error", "message"),
     [
-        (b"\xff\xfe\x00", "not valid UTF-8"),
-        (f"{HEADER}\n".encode(), "no data rows"),
-        (b"type,step\nTRANSFER,1", "Missing required columns"),
-        (f"{HEADER}\n{ROW}\n{ROW}\n{ROW}".encode(), "Too many rows"),
+        (b"\xff\xfe\x00", InvalidCsvError, "not valid UTF-8"),
+        (f"{HEADER}\n".encode(), InvalidCsvError, "no data rows"),
+        (b"type,step\nTRANSFER,1", InvalidCsvError, "Missing required columns"),
+        (f"{HEADER}\n{ROW}\n{ROW}\n{ROW}".encode(), BatchTooLargeError, "Too many rows"),
     ],
 )
-def test_file_level_problems_raise_batch_error(content, message):
-    with pytest.raises(BatchError, match=message):
+def test_file_level_problems_raise_app_errors(content, error, message):
+    with pytest.raises(error, match=message):
         parse_csv(content, 2)

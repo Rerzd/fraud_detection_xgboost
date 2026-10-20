@@ -23,13 +23,17 @@ def test_batch_scores_valid_rows_and_reports_errors(client):
 def test_batch_missing_columns_is_rejected(client):
     response = upload(client, "type,step,amount\nTRANSFER,1,100")
     assert response.status_code == 422
-    assert "Missing required columns" in response.json()["detail"]
+    error = response.json()["error"]
+    assert error["code"] == "INVALID_CSV"
+    assert "Missing required columns" in error["message"]
 
 
 def test_batch_row_limit(make_client):
     response = upload(make_client(batch_max_rows=2), CSV_3_VALID_1_INVALID)
-    assert response.status_code == 422
-    assert "Too many rows" in response.json()["detail"]
+    assert response.status_code == 413
+    error = response.json()["error"]
+    assert error["code"] == "BATCH_TOO_LARGE"
+    assert "Too many rows" in error["message"]
 
 
 def test_batch_size_limit(make_client):

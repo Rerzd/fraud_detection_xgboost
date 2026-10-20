@@ -3,10 +3,11 @@
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.core.errors import ModelUnavailableError
 from app.ml.model import FraudModel
 
 
@@ -23,7 +24,7 @@ def get_db(request: Request) -> Iterator[Session]:
 def get_model_service(request: Request) -> FraudModel:
     model = request.app.state.model
     if model is None:
-        raise HTTPException(status_code=503, detail="Model not loaded")
+        raise ModelUnavailableError("The model is not loaded, so nothing can be scored.")
     return model
 
 
