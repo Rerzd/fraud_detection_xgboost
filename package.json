@@ -11,8 +11,11 @@
     "dev:web": "npm --prefix frontend run dev",
     "test": "npm run test:api && npm run test:web",
     "test:api": "node scripts/py.mjs -m pytest backend/tests -q",
+    "test:cov": "node scripts/py.mjs -m pytest backend/tests -q --cov=app --cov-config=backend/pyproject.toml --cov-report=term-missing:skip-covered",
     "test:web": "npm --prefix frontend test",
     "lint": "npm --prefix frontend run lint",
+    "lint:py": "node scripts/py.mjs -m ruff check backend && node scripts/py.mjs -m ruff format --check backend",
+    "format:py": "node scripts/py.mjs -m ruff check --select I --fix backend && node scripts/py.mjs -m ruff format backend",
     "build": "npm --prefix frontend run build"
   },
   "engines": {

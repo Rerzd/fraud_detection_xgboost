@@ -25,3 +25,13 @@ quote-style = "double"
 [tool.pytest.ini_options]
 pythonpath = [".", "tests"]
 testpaths = ["tests"]
+
+# Coverage looks for its config in the current directory, so from the repository root pass
+# `--cov-config=backend/pyproject.toml` (the npm script and the CI job do).
+[tool.coverage.run]
+source = ["app"]
+
+[tool.coverage.report]
+# Measured line coverage of `app` is 100%, so the gate is 100: a new line needs a test. The rule
+# was "measured coverage rounded down to a multiple of 5"; lower this if it proves too strict.
+fail_under = 100

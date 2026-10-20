@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend tests (Python 3.13)
+    name: Backend lint and tests (Python 3.13)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -30,8 +30,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt -r backend/requirements-dev.txt
 
-      - name: Run pytest
-        run: python -m pytest backend/tests -q
+      - name: Lint (ruff check)
+        run: python -m ruff check backend
+
+      - name: Check formatting (ruff format)
+        run: python -m ruff format --check backend
+
+      - name: Run pytest with coverage (minimum set in backend/pyproject.toml)
+        run: >
+          python -m pytest backend/tests -q
+          --cov=app --cov-config=backend/pyproject.toml --cov-report=term-missing:skip-covered
 
   frontend:
     name: Frontend lint, tests and build (Node 22)
