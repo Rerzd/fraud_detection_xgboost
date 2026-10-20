@@ -29,7 +29,9 @@ def test_records_start_in_the_status_their_risk_level_implies(level, status):
 def test_pending_can_never_be_set(level):
     with pytest.raises(RuleViolationError) as caught:
         check_review(level, "pending", "a note")
-    assert caught.value.details == [{"field": "status", "message": caught.value.details[0]["message"]}]
+    assert caught.value.details == [
+        {"field": "status", "message": caught.value.details[0]["message"]}
+    ]
     assert "initial state" in caught.value.message
 
 
@@ -90,7 +92,11 @@ def test_a_rejected_review_changes_nothing(db_session):
     with pytest.raises(RuleViolationError):
         review_prediction(db_session, record.id, "confirmed_fraud", None)
     db_session.refresh(record)
-    assert (record.review_status, record.review_note, record.reviewed_at) == ("legitimate", None, None)
+    assert (record.review_status, record.review_note, record.reviewed_at) == (
+        "legitimate",
+        None,
+        None,
+    )
 
 
 def test_reviewing_an_unknown_prediction_is_not_found(db_session):
@@ -141,4 +147,3 @@ def test_a_fraud_the_model_missed_is_not_counted_towards_precision(db_session):
     stats = review_stats(db_session)
     assert (stats.confirmed_fraud, stats.false_positive, stats.missed_by_model) == (1, 1, 1)
     assert stats.observed_precision == 0.0  # 0 of the 1 flagged record was fraud
-

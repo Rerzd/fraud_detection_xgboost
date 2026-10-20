@@ -1,6 +1,6 @@
 """Logging: standard library only, one line per event, `key=value` fields, UTC timestamps.
 
-    2026-10-19T04:12:11Z INFO app.request method=POST path=/predict status=200 duration_ms=12.41 request_id=...
+2026-10-19T04:12:11Z INFO app.request method=POST path=/predict status=200 duration_ms=12.41 request_id=...
 """
 
 import json

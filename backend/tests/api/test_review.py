@@ -77,7 +77,9 @@ def test_a_later_review_replaces_the_earlier_one(client):
 
 def test_pending_cannot_be_set_by_hand(client):
     created = predict(client)
-    error = assert_envelope(review(client, created["id"], status="pending"), 422, "VALIDATION_ERROR")
+    error = assert_envelope(
+        review(client, created["id"], status="pending"), 422, "VALIDATION_ERROR"
+    )
     assert error["details"][0]["field"] == "status"
     assert "cannot be set" in error["message"]
     review(client, created["id"], status="legitimate")
@@ -87,9 +89,14 @@ def test_pending_cannot_be_set_by_hand(client):
 
 def test_confirming_fraud_on_a_low_risk_prediction_needs_a_note(client):
     low = predict(client, LOW_ROW)
-    error = assert_envelope(review(client, low["id"], status="confirmed_fraud"), 422, "VALIDATION_ERROR")
+    error = assert_envelope(
+        review(client, low["id"], status="confirmed_fraud"), 422, "VALIDATION_ERROR"
+    )
     assert error["details"] == [
-        {"field": "note", "message": "A note is required to confirm fraud on a low-risk prediction."}
+        {
+            "field": "note",
+            "message": "A note is required to confirm fraud on a low-risk prediction.",
+        }
     ]
     assert_envelope(
         review(client, low["id"], status="confirmed_fraud", note="   "), 422, "VALIDATION_ERROR"
@@ -103,7 +110,9 @@ def test_confirming_fraud_on_a_low_risk_prediction_needs_a_note(client):
 
 def test_a_low_risk_prediction_cannot_be_a_false_positive(client):
     low = predict(client, LOW_ROW)
-    error = assert_envelope(review(client, low["id"], status="false_positive"), 422, "VALIDATION_ERROR")
+    error = assert_envelope(
+        review(client, low["id"], status="false_positive"), 422, "VALIDATION_ERROR"
+    )
     assert error["details"][0]["field"] == "status"
 
 
@@ -125,7 +134,9 @@ def test_the_note_is_limited_to_500_characters(client):
 
 def test_a_blank_note_is_stored_as_none_and_a_padded_one_is_trimmed(client):
     created = predict(client)
-    assert review(client, created["id"], status="legitimate", note="  ").json()["review_note"] is None
+    assert (
+        review(client, created["id"], status="legitimate", note="  ").json()["review_note"] is None
+    )
     padded = review(client, created["id"], status="legitimate", note="  ok  ").json()
     assert padded["review_note"] == "ok"
 
@@ -154,7 +165,9 @@ def test_the_queue_is_the_pending_filter_and_can_be_sorted_by_score(client):
     first = queue["items"][0]["id"]
     review(client, first, status="legitimate")
     assert client.get(URL, params={"review_status": "pending"}).json()["total"] == 2
-    assert client.get(URL, params={"review_status": "legitimate"}).json()["total"] == 2  # low + reviewed
+    assert (
+        client.get(URL, params={"review_status": "legitimate"}).json()["total"] == 2
+    )  # low + reviewed
 
 
 def test_sort_is_validated_and_defaults_to_newest(client):
@@ -179,7 +192,9 @@ def test_stats_start_with_the_queue_and_no_precision(client):
 def test_stats_follow_the_reviews(client):
     ids = [predict(client)["id"] for _ in range(4)]
     low = predict(client, LOW_ROW)["id"]
-    for prediction_id, status in zip(ids, ("confirmed_fraud",) * 3 + ("false_positive",), strict=True):
+    for prediction_id, status in zip(
+        ids, ("confirmed_fraud",) * 3 + ("false_positive",), strict=True
+    ):
         review(client, prediction_id, status=status)
     review(client, low, status="confirmed_fraud", note="missed")
 
@@ -207,7 +222,9 @@ def test_the_openapi_spec_documents_the_review(client):
     spec = client.get("/openapi.json").json()
     operation = spec["paths"]["/api/v1/predictions/{prediction_id}/review"]["patch"]
     assert {"200", "404", "422"} <= operation["responses"].keys()
-    assert operation["requestBody"]["content"]["application/json"]["schema"]["$ref"].endswith("ReviewIn")
+    assert operation["requestBody"]["content"]["application/json"]["schema"]["$ref"].endswith(
+        "ReviewIn"
+    )
     stats = spec["components"]["schemas"]["ReviewStats"]
     stats_doc = " ".join(spec["paths"]["/api/v1/predictions/stats"]["get"]["description"].split())
     assert "not a model metric" in stats_doc

@@ -48,7 +48,9 @@ def test_not_ready_when_the_database_fails(client):
 
 def test_not_ready_names_every_failing_check(client):
     client.app.state.model = None
-    client.app.state.sessionmaker = sessionmaker(create_engine("sqlite:////nonexistent-dir/fraud.db"))
+    client.app.state.sessionmaker = sessionmaker(
+        create_engine("sqlite:////nonexistent-dir/fraud.db")
+    )
     error = assert_envelope(client.get("/api/v1/ready"), 503, "NOT_READY")
     assert [d["field"] for d in error["details"]] == ["model", "database"]
 
@@ -61,4 +63,3 @@ def test_unversioned_paths_no_longer_exist(client, path):
 def test_every_documented_endpoint_is_under_the_version_prefix(client):
     paths = client.get("/openapi.json").json()["paths"]
     assert paths and all(p.startswith("/api/v1/") for p in paths)
-

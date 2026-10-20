@@ -22,7 +22,10 @@ class ReviewIn(BaseModel):
     model_config = {
         "json_schema_extra": {
             "examples": [
-                {"status": "confirmed_fraud", "note": "Account drained to a new payee; customer called."}
+                {
+                    "status": "confirmed_fraud",
+                    "note": "Account drained to a new payee; customer called.",
+                }
             ]
         }
     }
@@ -31,7 +34,9 @@ class ReviewIn(BaseModel):
 class ReviewStats(BaseModel):
     """Counts from analyst reviews of the stored demo data. Not a model metric."""
 
-    pending: int = Field(description="Review queue: high and review predictions nobody has looked at")
+    pending: int = Field(
+        description="Review queue: high and review predictions nobody has looked at"
+    )
     reviewed: int = Field(description="Predictions an analyst has reviewed")
     confirmed_fraud: int
     false_positive: int

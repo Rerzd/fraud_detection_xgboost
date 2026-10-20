@@ -85,7 +85,9 @@ def prediction_stats(db: DbDep):
     summary="Get one stored prediction",
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
-def get_prediction(prediction_id: Annotated[int, Path(ge=1, description="Prediction id")], db: DbDep):
+def get_prediction(
+    prediction_id: Annotated[int, Path(ge=1, description="Prediction id")], db: DbDep
+):
     """The stored record: submitted payload, score, model that produced it and request id."""
     record = repository.get_prediction(db, prediction_id)
     if record is None:
@@ -100,7 +102,9 @@ def get_prediction(prediction_id: Annotated[int, Path(ge=1, description="Predict
     responses={**NOT_FOUND, **VALIDATION_ERROR},
 )
 def review_prediction(
-    prediction_id: Annotated[int, Path(ge=1, description="Prediction id")], body: ReviewIn, db: DbDep
+    prediction_id: Annotated[int, Path(ge=1, description="Prediction id")],
+    body: ReviewIn,
+    db: DbDep,
 ):
     """Record an analyst's verdict: `confirmed_fraud`, `false_positive` or `legitimate`, with an
     optional note (500 characters at most).

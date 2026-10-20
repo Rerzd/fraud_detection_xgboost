@@ -35,12 +35,16 @@ def test_missing_field_and_nested_location(client):
 
 
 def test_query_parameter_errors_name_the_parameter(client):
-    error = assert_envelope(client.get("/api/v1/predictions", params={"limit": 0}), 422, "VALIDATION_ERROR")
+    error = assert_envelope(
+        client.get("/api/v1/predictions", params={"limit": 0}), 422, "VALIDATION_ERROR"
+    )
     assert error["details"][0]["field"] == "limit"
 
 
 def test_a_body_that_is_not_json_is_a_validation_error(client):
-    response = client.post("/api/v1/predict", content=b"{not json", headers={"Content-Type": "application/json"})
+    response = client.post(
+        "/api/v1/predict", content=b"{not json", headers={"Content-Type": "application/json"}
+    )
     error = assert_envelope(response, 422, "VALIDATION_ERROR")
     assert error["details"][0]["field"] == "body"
 
@@ -74,8 +78,12 @@ def test_model_not_loaded_is_503_model_unavailable(client):
 def test_batch_file_problems_have_their_own_codes(client, make_client):
     assert_envelope(upload(client, "type,step\nTRANSFER,1"), 422, "INVALID_CSV")
     assert_envelope(upload(client, ""), 422, "INVALID_CSV")
-    assert_envelope(upload(make_client(batch_max_rows=1), CSV_3_VALID_1_INVALID), 413, "BATCH_TOO_LARGE")
-    assert_envelope(upload(make_client(batch_max_bytes=20), CSV_3_VALID_1_INVALID), 413, "BATCH_TOO_LARGE")
+    assert_envelope(
+        upload(make_client(batch_max_rows=1), CSV_3_VALID_1_INVALID), 413, "BATCH_TOO_LARGE"
+    )
+    assert_envelope(
+        upload(make_client(batch_max_bytes=20), CSV_3_VALID_1_INVALID), 413, "BATCH_TOO_LARGE"
+    )
 
 
 def test_the_incoming_request_id_ends_up_in_the_body(client):
@@ -109,7 +117,8 @@ def test_every_app_error_maps_to_its_status_and_code(tmp_path, error, status, co
 
 
 @pytest.mark.parametrize(
-    ("status", "code"), [(400, "VALIDATION_ERROR"), (401, "VALIDATION_ERROR"), (502, "INTERNAL_ERROR")]
+    ("status", "code"),
+    [(400, "VALIDATION_ERROR"), (401, "VALIDATION_ERROR"), (502, "INTERNAL_ERROR")],
 )
 def test_a_stray_http_exception_still_gets_the_envelope(tmp_path, status, code):
     app = create_app(Settings(_env_file=None, db_path=tmp_path / "t.db"))

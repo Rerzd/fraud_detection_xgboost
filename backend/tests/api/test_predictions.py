@@ -119,7 +119,10 @@ def test_filter_by_creation_time_is_inclusive(client):
 
     assert ids(client, created_from=T0.isoformat()) == [late, middle]
     assert ids(client, created_to=T0.isoformat()) == [middle, early]
-    window = {"created_from": (T0 - timedelta(days=1)).isoformat(), "created_to": (T0 + timedelta(days=1)).isoformat()}
+    window = {
+        "created_from": (T0 - timedelta(days=1)).isoformat(),
+        "created_to": (T0 + timedelta(days=1)).isoformat(),
+    }
     assert ids(client, **window) == [middle]
 
 
@@ -143,7 +146,12 @@ def test_filters_combine_with_pagination(client):
 
 @pytest.mark.parametrize(
     "params",
-    [{"risk_level": "extreme"}, {"source": "other"}, {"created_from": "yesterday"}, {"created_to": "2026-13-45"}],
+    [
+        {"risk_level": "extreme"},
+        {"source": "other"},
+        {"created_from": "yesterday"},
+        {"created_to": "2026-13-45"},
+    ],
 )
 def test_invalid_filter_values_are_validation_errors(client, params):
     assert_envelope(client.get(URL, params=params), 422, "VALIDATION_ERROR")

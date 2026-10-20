@@ -87,15 +87,21 @@ def test_the_prediction_example_matches_what_the_model_returns(client, spec):
     assert example["probability"] == pytest.approx(live["probability"], abs=1e-6)
     assert example["features"] == live["features"]
     assert example["signals"] == live["signals"]
-    assert example["explanation"]["base_value"] == pytest.approx(live["explanation"]["base_value"], abs=1e-3)
-    for shown, real in zip(example["explanation"]["contributions"], live["explanation"]["contributions"], strict=True):
+    assert example["explanation"]["base_value"] == pytest.approx(
+        live["explanation"]["base_value"], abs=1e-3
+    )
+    for shown, real in zip(
+        example["explanation"]["contributions"], live["explanation"]["contributions"], strict=True
+    ):
         assert shown["feature"] == real["feature"]
         assert shown["contribution"] == pytest.approx(real["contribution"], abs=1e-3)
 
 
 def test_listings_are_documented_as_pages(spec):
     paths = spec["paths"]
-    predictions = paths["/api/v1/predictions"]["get"]["responses"]["200"]["content"]["application/json"]
+    predictions = paths["/api/v1/predictions"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]
     batches = paths["/api/v1/batches"]["get"]["responses"]["200"]["content"]["application/json"]
     assert predictions["schema"]["$ref"].endswith("Page_PredictionRecord_")
     assert batches["schema"]["$ref"].endswith("Page_BatchRecord_")

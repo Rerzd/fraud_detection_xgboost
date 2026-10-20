@@ -47,7 +47,15 @@ def insert(
     request_id: str | None = None,
 ) -> Prediction:
     record = _to_record(
-        tx, probability, risk_level, review_status, "single", None, model_version, model_hash, request_id
+        tx,
+        probability,
+        risk_level,
+        review_status,
+        "single",
+        None,
+        model_version,
+        model_hash,
+        request_id,
     )
     session.add(record)
     session.commit()

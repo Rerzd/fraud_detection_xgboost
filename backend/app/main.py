@@ -26,7 +26,12 @@ async def lifespan(app: FastAPI):
         model = FraudModel.load(settings.model_path, settings.model_version)
         app.state.model = model
         logger.info(
-            kv(event="model_loaded", path=settings.model_path, version=model.version, sha256=model.sha256)
+            kv(
+                event="model_loaded",
+                path=settings.model_path,
+                version=model.version,
+                sha256=model.sha256,
+            )
         )
     except Exception:
         logger.exception(kv(event="model_load_failed", path=settings.model_path))

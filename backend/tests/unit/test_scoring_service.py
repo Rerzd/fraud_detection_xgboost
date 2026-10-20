@@ -8,7 +8,9 @@ from conftest import NOTEBOOK_FRAUD_ROW
 
 
 def test_scores_explains_and_persists_one_row(model, db_session):
-    result = score_transaction(TransactionIn(**NOTEBOOK_FRAUD_ROW), model, Settings(_env_file=None), db_session)
+    result = score_transaction(
+        TransactionIn(**NOTEBOOK_FRAUD_ROW), model, Settings(_env_file=None), db_session
+    )
 
     assert result.risk_level == "high" and result.is_fraud
     assert len(result.explanation.contributions) == 9

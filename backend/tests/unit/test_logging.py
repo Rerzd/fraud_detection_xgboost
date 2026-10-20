@@ -4,7 +4,9 @@ from app.core.logging import LOGGER_NAME, configure_logging, kv
 
 
 def test_kv_renders_plain_values_bare_and_quotes_awkward_ones():
-    assert kv(method="GET", status=200, duration_ms="1.50") == "method=GET status=200 duration_ms=1.50"
+    assert (
+        kv(method="GET", status=200, duration_ms="1.50") == "method=GET status=200 duration_ms=1.50"
+    )
     assert kv(path="/a b") == 'path="/a b"'
     assert kv(note='say "hi"') == 'note="say \\"hi\\""'
     assert kv(empty="") == 'empty=""'

@@ -23,7 +23,9 @@ def test_contributions_add_up_to_logit(client, example):
 
 
 def test_contributions_sorted_by_magnitude(client):
-    contributions = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()["explanation"]["contributions"]
+    contributions = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()["explanation"][
+        "contributions"
+    ]
     magnitudes = [abs(c["contribution"]) for c in contributions]
     assert magnitudes == sorted(magnitudes, reverse=True)
     assert len(contributions) == 9

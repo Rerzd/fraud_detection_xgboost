@@ -58,7 +58,10 @@ TAGS = [
         "description": "The prediction log: every stored score, paginated, with filters, statistics and "
         "the analyst review of each one.",
     },
-    {"name": "model", "description": "The model card: training setup, metrics, thresholds and limits."},
+    {
+        "name": "model",
+        "description": "The model card: training setup, metrics, thresholds and limits.",
+    },
 ]
 
 SWAGGER_UI_PARAMETERS = {
@@ -76,7 +79,9 @@ def unique_id(route: APIRoute) -> str:
     return route.name
 
 
-def _doc(description: str, **examples: tuple[str, str, list[dict[str, str]] | None]) -> dict[str, Any]:
+def _doc(
+    description: str, **examples: tuple[str, str, list[dict[str, str]] | None]
+) -> dict[str, Any]:
     """An error response in the shared envelope, with one named example per (code, message, details)."""
     return {
         "model": ErrorResponse,

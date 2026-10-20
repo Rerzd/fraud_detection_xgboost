@@ -26,7 +26,9 @@ def get_optional_model(request: Request) -> FraudModel | None:
     return request.app.state.model
 
 
-def get_model_service(model: Annotated[FraudModel | None, Depends(get_optional_model)]) -> FraudModel:
+def get_model_service(
+    model: Annotated[FraudModel | None, Depends(get_optional_model)],
+) -> FraudModel:
     if model is None:
         raise ModelUnavailableError("The model is not loaded, so nothing can be scored.")
     return model

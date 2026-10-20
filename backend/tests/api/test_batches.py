@@ -55,7 +55,12 @@ def test_a_batch_run_is_recorded(client, model):
     record = client.get(f"/api/v1/batches/{body['batch_id']}").json()
     assert record["id"] == body["batch_id"]
     assert record["filename"] == "march.csv" == body["filename"]
-    assert (record["total_rows"], record["scored"], record["invalid"], record["flagged"]) == (4, 3, 1, 1)
+    assert (record["total_rows"], record["scored"], record["invalid"], record["flagged"]) == (
+        4,
+        3,
+        1,
+        1,
+    )
     assert record["model_version"] == "xgb-paysim-v1"
     assert record["model_hash"] == model.sha256[:12]
     assert record["created_at"].endswith("Z")
@@ -80,8 +85,16 @@ def test_a_file_with_only_invalid_rows_is_still_a_recorded_run(client):
     body = upload(client, HEADER + "\nPAYMENT,1,1,1,1,1,1\nPAYMENT,2,2,2,2,2,2").json()
     assert body["summary"]["scored"] == 0
     record = client.get(f"/api/v1/batches/{body['batch_id']}").json()
-    assert (record["total_rows"], record["scored"], record["invalid"], record["flagged"]) == (2, 0, 2, 0)
-    assert client.get("/api/v1/predictions", params={"batch_id": body["batch_id"]}).json()["total"] == 0
+    assert (record["total_rows"], record["scored"], record["invalid"], record["flagged"]) == (
+        2,
+        0,
+        2,
+        0,
+    )
+    assert (
+        client.get("/api/v1/predictions", params={"batch_id": body["batch_id"]}).json()["total"]
+        == 0
+    )
 
 
 def test_a_rejected_file_leaves_no_batch_behind(client, make_client):

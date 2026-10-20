@@ -115,4 +115,3 @@ def db_session():
     with sessionmaker(engine, expire_on_commit=False)() as session:
         yield session
     engine.dispose()
-

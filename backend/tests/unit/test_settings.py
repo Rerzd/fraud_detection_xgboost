@@ -19,7 +19,11 @@ def test_defaults_are_the_documented_ones():
     assert s.model_version == "xgb-paysim-v1"
     assert (s.review_threshold, s.fraud_threshold) == (0.2, 0.5)
     assert (s.batch_max_rows, s.batch_max_bytes) == (10_000, 5 * 1024 * 1024)
-    assert s.cors_origins == ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]
+    assert s.cors_origins == [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+    ]
     assert s.log_level == "INFO"
 
 
@@ -90,6 +94,8 @@ def test_env_example_documents_every_variable_with_its_default():
     text = (BACKEND_DIR / ".env.example").read_text()
     for name, field in Settings.model_fields.items():
         variable = field.validation_alias or f"FRAUD_{name.upper()}"
-        assert re.search(rf"^#? ?{variable}=", text, re.M), f"{variable} is missing from .env.example"
+        assert re.search(rf"^#? ?{variable}=", text, re.M), (
+            f"{variable} is missing from .env.example"
+        )
     example = Settings(_env_file=BACKEND_DIR / ".env.example")
     assert example.model_dump() == make().model_dump()

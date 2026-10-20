@@ -30,7 +30,12 @@ def ensure_schema(engine: Engine) -> None:
 
     if inspect(engine).get_table_names():
         logger.warning(
-            kv(event="schema_rebuilt", found=found, expected=SCHEMA_VERSION, action="tables dropped")
+            kv(
+                event="schema_rebuilt",
+                found=found,
+                expected=SCHEMA_VERSION,
+                action="tables dropped",
+            )
         )
         Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

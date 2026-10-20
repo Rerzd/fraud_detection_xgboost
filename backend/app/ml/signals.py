@@ -34,9 +34,13 @@ def describe(tx: Mapping) -> list[str]:
 
     origin_gap = new_org + amount - old_org
     if not origin_empty and abs(origin_gap) > TOLERANCE:
-        signals.append(f"Origin balance does not reconcile with the amount (gap {origin_gap:,.2f}).")
+        signals.append(
+            f"Origin balance does not reconcile with the amount (gap {origin_gap:,.2f})."
+        )
     dest_gap = old_dest + amount - new_dest
     if not dest_empty and abs(dest_gap) > TOLERANCE:
-        signals.append(f"Destination balance does not reconcile with the amount (gap {dest_gap:,.2f}).")
+        signals.append(
+            f"Destination balance does not reconcile with the amount (gap {dest_gap:,.2f})."
+        )
 
     return signals

@@ -112,7 +112,12 @@ def error_response(
     return JSONResponse(
         status_code=status,
         content={
-            "error": {"code": code, "message": message, "details": details, "request_id": request_id}
+            "error": {
+                "code": code,
+                "message": message,
+                "details": details,
+                "request_id": request_id,
+            }
         },
         headers={**(headers or {}), REQUEST_ID_HEADER: request_id},
     )

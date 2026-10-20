@@ -11,7 +11,9 @@ def test_prediction_response_names_the_model(client, model):
 
 
 def test_the_stored_row_has_the_model_and_the_request_id(client, model):
-    sent = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW, headers={"X-Request-ID": "trace-1"})
+    sent = client.post(
+        "/api/v1/predict", json=NOTEBOOK_FRAUD_ROW, headers={"X-Request-ID": "trace-1"}
+    )
     (row,) = client.get("/api/v1/predictions").json()["items"]
     assert row["model_version"] == sent.json()["model_version"] == "xgb-paysim-v1"
     assert row["model_hash"] == model.sha256[:12]

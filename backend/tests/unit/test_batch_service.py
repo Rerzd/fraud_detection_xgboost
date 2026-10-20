@@ -30,7 +30,7 @@ def test_bom_and_padded_headers_are_accepted():
 
 
 def test_valid_rows_come_back_as_plain_dicts():
-    (_, tx), = parse(f"{HEADER}\n{ROW}")[0]
+    ((_, tx),) = parse(f"{HEADER}\n{ROW}")[0]
     assert tx == {
         "type": "TRANSFER",
         "step": 10,

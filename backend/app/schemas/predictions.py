@@ -12,7 +12,9 @@ class PredictionRecord(BaseModel):
     id: int
     created_at: UtcDatetime = Field(description="UTC")
     source: Source
-    batch_id: str | None = Field(description="The batch the row came from; null for single requests")
+    batch_id: str | None = Field(
+        description="The batch the row came from; null for single requests"
+    )
     type: TransactionType
     amount: float
     probability: float
