@@ -19,9 +19,10 @@ USER app
 
 EXPOSE 8000
 
-# Healthy only when the API answers and the model is loaded.
+# Healthy only when /ready answers 200: the model is loaded and the database responds.
+# (urlopen raises on the 503 that /ready returns otherwise, which makes python exit non-zero.)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD ["python", "-c", "import json, sys, urllib.request; r = urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4); sys.exit(0 if json.load(r)['model_loaded'] else 1)"]
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/ready', timeout=4)"]
 
 # The app logs one line per request itself, so uvicorn's access log would only repeat it.
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
