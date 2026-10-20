@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile
 
-from app.api.deps import DbDep, ModelDep, SettingsDep
+from app.api.deps import DbDep, ModelDep, RequestIdDep, SettingsDep
 from app.api.openapi import BATCH_ERRORS, MODEL_UNAVAILABLE
 from app.schemas.batches import BatchLimits, BatchOut
 from app.services import batch_service
@@ -24,11 +24,13 @@ def batch_limits(settings: SettingsDep) -> BatchLimits:
     summary="Score a CSV of transactions",
     responses={**BATCH_ERRORS, **MODEL_UNAVAILABLE},
 )
-def predict_batch(file: UploadFile, model: ModelDep, settings: SettingsDep, db: DbDep):
+def predict_batch(
+    file: UploadFile, model: ModelDep, settings: SettingsDep, db: DbDep, request_id: RequestIdDep
+):
     """Upload a CSV (multipart field `file`) with the columns from `/predict/batch/limits`.
 
     Valid rows are scored and stored; invalid rows are not, and come back in `errors` with their
     CSV line number (the header is line 1). Rows in the response are sorted by probability.
     """
     content = file.file.read(settings.batch_max_bytes + 1)
-    return batch_service.score_batch(content, model, settings, db)
+    return batch_service.score_batch(content, model, settings, db, request_id)

@@ -12,24 +12,15 @@ from app.core.errors import (
     InvalidCsvError,
     ModelUnavailableError,
     NotFoundError,
+    NotReadyError,
 )
 from app.main import create_app
-from app.schemas.common import ErrorResponse
-from conftest import CSV_3_VALID_1_INVALID, NOTEBOOK_FRAUD_ROW, upload
-
-
-def assert_envelope(response, status: int, code: str) -> dict:
-    """The body must match the documented schema exactly and carry the request id."""
-    assert response.status_code == status
-    body = ErrorResponse.model_validate(response.json())
-    assert body.error.code == code
-    assert body.error.request_id == response.headers["X-Request-ID"]
-    return response.json()["error"]
+from conftest import CSV_3_VALID_1_INVALID, NOTEBOOK_FRAUD_ROW, assert_envelope, upload
 
 
 def test_validation_error_lists_each_field(client):
     bad = {**NOTEBOOK_FRAUD_ROW, "amount": 0, "type": "PAYMENT"}
-    error = assert_envelope(client.post("/predict", json=bad), 422, "VALIDATION_ERROR")
+    error = assert_envelope(client.post("/api/v1/predict", json=bad), 422, "VALIDATION_ERROR")
     fields = {d["field"]: d["message"] for d in error["details"]}
     assert set(fields) == {"amount", "type"}
     assert fields["amount"] == "Input should be greater than 0"
@@ -38,23 +29,23 @@ def test_validation_error_lists_each_field(client):
 
 def test_missing_field_and_nested_location(client):
     body = {k: v for k, v in NOTEBOOK_FRAUD_ROW.items() if k != "step"}
-    error = assert_envelope(client.post("/predict", json=body), 422, "VALIDATION_ERROR")
+    error = assert_envelope(client.post("/api/v1/predict", json=body), 422, "VALIDATION_ERROR")
     assert error["details"] == [{"field": "step", "message": "Field required"}]
 
 
 def test_query_parameter_errors_name_the_parameter(client):
-    error = assert_envelope(client.get("/predictions", params={"limit": 0}), 422, "VALIDATION_ERROR")
+    error = assert_envelope(client.get("/api/v1/predictions", params={"limit": 0}), 422, "VALIDATION_ERROR")
     assert error["details"][0]["field"] == "limit"
 
 
 def test_a_body_that_is_not_json_is_a_validation_error(client):
-    response = client.post("/predict", content=b"{not json", headers={"Content-Type": "application/json"})
+    response = client.post("/api/v1/predict", content=b"{not json", headers={"Content-Type": "application/json"})
     error = assert_envelope(response, 422, "VALIDATION_ERROR")
     assert error["details"][0]["field"] == "body"
 
 
 def test_missing_upload_is_a_validation_error(client):
-    error = assert_envelope(client.post("/predict/batch"), 422, "VALIDATION_ERROR")
+    error = assert_envelope(client.post("/api/v1/predict/batch"), 422, "VALIDATION_ERROR")
     assert error["details"] == [{"field": "file", "message": "Field required"}]
 
 
@@ -65,15 +56,15 @@ def test_unknown_route_is_a_404_envelope(client):
 
 
 def test_wrong_method_is_an_envelope_too(client):
-    error = assert_envelope(client.put("/health"), 405, "NOT_FOUND")
+    error = assert_envelope(client.put("/api/v1/health"), 405, "NOT_FOUND")
     assert "not allowed" in error["message"]
 
 
 def test_model_not_loaded_is_503_model_unavailable(client):
     client.app.state.model = None
     for response in (
-        client.post("/predict", json=NOTEBOOK_FRAUD_ROW),
-        client.get("/model/info"),
+        client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW),
+        client.get("/api/v1/model/info"),
         upload(client, CSV_3_VALID_1_INVALID),
     ):
         assert_envelope(response, 503, "MODEL_UNAVAILABLE")
@@ -96,6 +87,7 @@ def test_the_incoming_request_id_ends_up_in_the_body(client):
     [
         (NotFoundError, 404, "NOT_FOUND"),
         (ModelUnavailableError, 503, "MODEL_UNAVAILABLE"),
+        (NotReadyError, 503, "NOT_READY"),
         (BatchTooLargeError, 413, "BATCH_TOO_LARGE"),
         (InvalidCsvError, 422, "INVALID_CSV"),
         (ConflictError, 409, "CONFLICT"),
@@ -133,7 +125,14 @@ def test_a_stray_http_exception_still_gets_the_envelope(tmp_path, status, code):
 
 def test_app_error_subclasses_cover_the_documented_codes():
     codes = {cls.code for cls in AppError.__subclasses__()}
-    assert codes == {"NOT_FOUND", "MODEL_UNAVAILABLE", "BATCH_TOO_LARGE", "INVALID_CSV", "CONFLICT"}
+    assert codes == {
+        "NOT_FOUND",
+        "MODEL_UNAVAILABLE",
+        "NOT_READY",
+        "BATCH_TOO_LARGE",
+        "INVALID_CSV",
+        "CONFLICT",
+    }
 
 
 def test_unhandled_exception_is_a_generic_500_that_is_logged(tmp_path, caplog):
@@ -159,4 +158,4 @@ def test_unhandled_exception_is_a_generic_500_that_is_logged(tmp_path, caplog):
 
 
 def test_successful_responses_are_not_wrapped(client):
-    assert "error" not in client.get("/health").json()
+    assert "error" not in client.get("/api/v1/health").json()

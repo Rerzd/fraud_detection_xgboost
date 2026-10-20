@@ -8,6 +8,7 @@ from app.core.config import Settings
 from app.db.models import Base
 from app.main import create_app
 from app.ml.model import FraudModel
+from app.schemas.common import ErrorResponse
 
 # The notebook's known fraud row (Xtest index 6020168) in raw, pre-preprocessing form.
 NOTEBOOK_FRAUD_ROW = {
@@ -35,7 +36,16 @@ CSV_3_VALID_1_INVALID = "\n".join(
 
 def upload(client, text: str, name: str = "batch.csv"):
     """POST a CSV given as text to the batch endpoint."""
-    return client.post("/predict/batch", files={"file": (name, text.encode(), "text/csv")})
+    return client.post("/api/v1/predict/batch", files={"file": (name, text.encode(), "text/csv")})
+
+
+def assert_envelope(response, status: int, code: str) -> dict:
+    """The body must match the documented error schema exactly and carry the request id."""
+    assert response.status_code == status
+    body = ErrorResponse.model_validate(response.json())
+    assert body.error.code == code
+    assert body.error.request_id == response.headers["X-Request-ID"]
+    return response.json()["error"]
 
 
 @pytest.fixture

@@ -8,6 +8,7 @@ from app.schemas.common import ErrorResponse
 
 TITLE = "Fraud Detection API"
 VERSION = "1.0.0"
+API_PREFIX = "/api/v1"  # every endpoint lives under it; a breaking change would add /api/v2
 
 DESCRIPTION = """
 Scores mobile-money transactions with an XGBoost classifier trained on **PaySim**, a synthetic
@@ -18,12 +19,20 @@ the fraud probability with a per-feature explanation, and keeps the result in a 
 `low` (< 0.2, approve), `review` (0.2 to 0.5, send to manual review) and `high` (>= 0.5, flag for
 fraud).
 
+**Versioning.** Every endpoint is under `/api/v1`; a breaking change would be published as `/api/v2`.
+`/api/v1/health` says the process is up, `/api/v1/ready` says it can serve (model loaded, database
+answering).
+
+**Traceability.** Each prediction carries `model_version` (the configured label) and `model_hash`
+(the first 12 characters of the sha256 of the model file) and is stored with both, so a score can
+always be tied to the exact artifact that produced it.
+
 **Errors.** Every error, whatever its status, has the same body:
 `{"error": {"code", "message", "details", "request_id"}}`. The `request_id` is also returned in the
 `X-Request-ID` header (send your own to trace a call), next to `X-Process-Time-Ms`.
 
 **Limits.** The model was trained on synthetic data and only knows `TRANSFER` and `CASH_OUT`
-transactions. Probabilities are not calibrated. See `/model/info` for the model card.
+transactions. Probabilities are not calibrated. See `/api/v1/model/info` for the model card.
 """.strip()
 
 LICENSE = {"name": "MIT", "identifier": "MIT"}
@@ -108,6 +117,17 @@ MODEL_UNAVAILABLE = {
     503: _doc(
         "The model artifact could not be loaded, so nothing can be scored.",
         model=("MODEL_UNAVAILABLE", "The model is not loaded, so nothing can be scored.", None),
+    )
+}
+
+NOT_READY = {
+    503: _doc(
+        "The model or the database is not working; `details` names each failing check.",
+        model=(
+            "NOT_READY",
+            "The service is not ready.",
+            [{"field": "model", "message": "The model artifact is not loaded."}],
+        ),
     )
 }
 

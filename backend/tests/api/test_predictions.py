@@ -2,8 +2,8 @@ from conftest import CSV_3_VALID_1_INVALID, NOTEBOOK_FRAUD_ROW, upload
 
 
 def test_predict_persists_one_row(client):
-    client.post("/predict", json=NOTEBOOK_FRAUD_ROW)
-    history = client.get("/predictions").json()
+    client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW)
+    history = client.get("/api/v1/predictions").json()
     assert len(history) == 1
     assert history[0]["source"] == "single"
     assert history[0]["risk_level"] == "high"
@@ -11,9 +11,9 @@ def test_predict_persists_one_row(client):
 
 
 def test_stats_are_correct(client):
-    client.post("/predict", json=NOTEBOOK_FRAUD_ROW)
+    client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW)
     upload(client, CSV_3_VALID_1_INVALID)
-    stats = client.get("/predictions/stats").json()
+    stats = client.get("/api/v1/predictions/stats").json()
     assert stats == {
         "total": 4,
         "by_risk": {"low": 1, "review": 1, "high": 2},
@@ -23,7 +23,7 @@ def test_stats_are_correct(client):
 
 def test_history_filter_and_clear(client):
     upload(client, CSV_3_VALID_1_INVALID)
-    high = client.get("/predictions", params={"risk_level": "high"}).json()
+    high = client.get("/api/v1/predictions", params={"risk_level": "high"}).json()
     assert [h["risk_level"] for h in high] == ["high"]
-    assert client.delete("/predictions").json() == {"deleted": 3}
-    assert client.get("/predictions").json() == []
+    assert client.delete("/api/v1/predictions").json() == {"deleted": 3}
+    assert client.get("/api/v1/predictions").json() == []

@@ -46,6 +46,13 @@ class ModelUnavailableError(AppError):
     code = "MODEL_UNAVAILABLE"
 
 
+class NotReadyError(AppError):
+    """A dependency the API needs (model, database) is not working; `details` names each one."""
+
+    status_code = 503
+    code = "NOT_READY"
+
+
 class BatchTooLargeError(AppError):
     """An uploaded file has more bytes or more rows than the configured limits."""
 

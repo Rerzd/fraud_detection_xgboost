@@ -11,13 +11,20 @@ RiskLevel = Literal["low", "review", "high"]
 class HealthOut(BaseModel):
     status: str
     model_loaded: bool
-    model_version: str | None
+    model_version: str | None = Field(description="Configured label of the loaded model")
+    model_hash: str | None = Field(description="First 12 hex characters of the model file's sha256")
+
+
+class ReadyOut(BaseModel):
+    status: Literal["ready"]
+    checks: dict[str, str] = Field(description="Result of each dependency check")
 
 
 ErrorCode = Literal[
     "VALIDATION_ERROR",
     "NOT_FOUND",
     "MODEL_UNAVAILABLE",
+    "NOT_READY",
     "BATCH_TOO_LARGE",
     "INVALID_CSV",
     "CONFLICT",

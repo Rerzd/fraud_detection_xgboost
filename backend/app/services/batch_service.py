@@ -54,7 +54,13 @@ def parse_csv(content: bytes, max_rows: int) -> tuple[list[tuple[int, dict]], li
     return valid, errors
 
 
-def score_batch(content: bytes, model: FraudModel, settings: Settings, session: Session) -> BatchOut:
+def score_batch(
+    content: bytes,
+    model: FraudModel,
+    settings: Settings,
+    session: Session,
+    request_id: str | None = None,
+) -> BatchOut:
     """Score every valid row of an uploaded CSV, store the scored rows and summarise the run.
 
     `content` may be read up to `batch_max_bytes + 1` bytes, so an oversized upload is detected
@@ -81,6 +87,9 @@ def score_batch(content: bytes, model: FraudModel, settings: Settings, session: 
                 for r in rows
             ],
             batch_id,
+            model_version=model.version,
+            model_hash=model.short_hash,
+            request_id=request_id,
         )
 
     risk_counts = {"low": 0, "review": 0, "high": 0}
@@ -89,6 +98,8 @@ def score_batch(content: bytes, model: FraudModel, settings: Settings, session: 
     rows.sort(key=lambda r: r["probability"], reverse=True)
     return BatchOut(
         batch_id=batch_id,
+        model_version=model.version,
+        model_hash=model.short_hash,
         summary={
             "total": len(rows) + len(errors),
             "scored": len(rows),

@@ -14,7 +14,7 @@ def test_batch_scores_valid_rows_and_reports_errors(client):
     probabilities = [r["probability"] for r in body["rows"]]
     assert probabilities == sorted(probabilities, reverse=True)
 
-    history = client.get("/predictions").json()
+    history = client.get("/api/v1/predictions").json()
     assert len(history) == 3
     assert {h["source"] for h in history} == {"batch"}
     assert {h["batch_id"] for h in history} == {body["batch_id"]}
@@ -42,7 +42,7 @@ def test_batch_size_limit(make_client):
 
 
 def test_batch_limits_come_from_config(make_client):
-    body = make_client(batch_max_rows=123).get("/predict/batch/limits").json()
+    body = make_client(batch_max_rows=123).get("/api/v1/predict/batch/limits").json()
     assert body["max_rows"] == 123
     assert body["max_bytes"] == 5 * 1024 * 1024
     assert body["required_columns"] == HEADER.split(",")

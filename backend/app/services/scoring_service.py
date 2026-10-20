@@ -12,15 +12,29 @@ from app.schemas.scoring import PredictionOut, TransactionIn
 
 
 def score_transaction(
-    tx: TransactionIn, model: FraudModel, settings: Settings, session: Session
+    tx: TransactionIn,
+    model: FraudModel,
+    settings: Settings,
+    session: Session,
+    request_id: str | None = None,
 ) -> PredictionOut:
     """Validation already happened at the API boundary (`TransactionIn`)."""
     raw = tx.model_dump()
     features = build_features([raw])
     probability = model.predict_proba(features)[0]
     level = risk_level(probability, settings.review_threshold, settings.fraud_threshold)
-    repository.insert(session, raw, probability, level)
+    repository.insert(
+        session,
+        raw,
+        probability,
+        level,
+        model_version=model.version,
+        model_hash=model.short_hash,
+        request_id=request_id,
+    )
     return PredictionOut(
+        model_version=model.version,
+        model_hash=model.short_hash,
         probability=probability,
         risk_level=level,
         is_fraud=level == "high",

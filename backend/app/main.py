@@ -62,7 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.add_middleware(RequestContextMiddleware)
     for router in (health.router, model.router, scoring.router, batches.router, predictions.router):
-        app.include_router(router)
+        app.include_router(router, prefix=openapi.API_PREFIX)
 
     @app.get("/", include_in_schema=False)
     def root() -> RedirectResponse:

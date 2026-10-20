@@ -19,6 +19,9 @@ def risk_level(probability: float, review_threshold: float, fraud_threshold: flo
     return "low"
 
 
+SHORT_HASH_LENGTH = 12
+
+
 def file_sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with open(path, "rb") as f:
@@ -32,6 +35,11 @@ class FraudModel:
         self.pipeline = pipeline
         self.version = version
         self.sha256 = sha256  # of the pickle file: ties every score to the exact artifact
+
+    @property
+    def short_hash(self) -> str:
+        """First 12 hex characters of the sha256: enough to tell artifacts apart in logs and the UI."""
+        return self.sha256[:SHORT_HASH_LENGTH]
 
     @classmethod
     def load(cls, path: Path, version: str) -> "FraudModel":

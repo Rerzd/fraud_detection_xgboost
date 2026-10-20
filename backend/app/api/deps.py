@@ -21,13 +21,24 @@ def get_db(request: Request) -> Iterator[Session]:
         yield session
 
 
-def get_model_service(request: Request) -> FraudModel:
-    model = request.app.state.model
+def get_optional_model(request: Request) -> FraudModel | None:
+    """The loaded model, or None when it failed to load. Health checks use this."""
+    return request.app.state.model
+
+
+def get_model_service(model: Annotated[FraudModel | None, Depends(get_optional_model)]) -> FraudModel:
     if model is None:
         raise ModelUnavailableError("The model is not loaded, so nothing can be scored.")
     return model
 
 
+def get_request_id(request: Request) -> str | None:
+    """The id set by `RequestContextMiddleware`, stored with every prediction the call creates."""
+    return getattr(request.state, "request_id", None)
+
+
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 DbDep = Annotated[Session, Depends(get_db)]
 ModelDep = Annotated[FraudModel, Depends(get_model_service)]
+OptionalModelDep = Annotated[FraudModel | None, Depends(get_optional_model)]
+RequestIdDep = Annotated[str | None, Depends(get_request_id)]

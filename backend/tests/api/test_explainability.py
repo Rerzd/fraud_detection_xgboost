@@ -12,7 +12,7 @@ def logit(p: float) -> float:
 
 @pytest.mark.parametrize("example", EXAMPLES, ids=[e["id"] for e in EXAMPLES])
 def test_contributions_add_up_to_logit(client, example):
-    body = client.post("/predict", json=example["transaction"]).json()
+    body = client.post("/api/v1/predict", json=example["transaction"]).json()
     explanation = body["explanation"]
     total = explanation["base_value"] + sum(c["contribution"] for c in explanation["contributions"])
     # float32 probabilities saturate near 1, so compare in probability space there
@@ -23,7 +23,7 @@ def test_contributions_add_up_to_logit(client, example):
 
 
 def test_contributions_sorted_by_magnitude(client):
-    contributions = client.post("/predict", json=NOTEBOOK_FRAUD_ROW).json()["explanation"]["contributions"]
+    contributions = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()["explanation"]["contributions"]
     magnitudes = [abs(c["contribution"]) for c in contributions]
     assert magnitudes == sorted(magnitudes, reverse=True)
     assert len(contributions) == 9
@@ -31,17 +31,17 @@ def test_contributions_sorted_by_magnitude(client):
 
 @pytest.mark.parametrize("example", EXAMPLES, ids=[e["id"] for e in EXAMPLES])
 def test_every_example_scores_to_its_label(client, example):
-    body = client.post("/predict", json=example["transaction"]).json()
+    body = client.post("/api/v1/predict", json=example["transaction"]).json()
     assert body["risk_level"] == example["label"]
 
 
 def test_examples_cover_all_risk_levels(client):
-    labels = {e["label"] for e in client.get("/examples").json()}
+    labels = {e["label"] for e in client.get("/api/v1/examples").json()}
     assert labels == {"low", "review", "high"}
 
 
 def test_signals_describe_the_fraud_row(client):
-    signals = client.post("/predict", json=NOTEBOOK_FRAUD_ROW).json()["signals"]
+    signals = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()["signals"]
     text = " ".join(signals)
     assert "fully drained" in text
     assert "full origin balance" in text
@@ -50,5 +50,5 @@ def test_signals_describe_the_fraud_row(client):
 
 def test_consistent_transaction_has_no_discrepancy_signal(client):
     tx = next(e for e in EXAMPLES if e["id"] == "consistent-cashout")["transaction"]
-    signals = client.post("/predict", json=tx).json()["signals"]
+    signals = client.post("/api/v1/predict", json=tx).json()["signals"]
     assert not any("reconcile" in s for s in signals)

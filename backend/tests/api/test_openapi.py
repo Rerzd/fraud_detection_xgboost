@@ -52,11 +52,11 @@ def error_schema_ref(response):
 
 def test_error_responses_use_the_shared_envelope(spec):
     ref = "#/components/schemas/ErrorResponse"
-    predict = spec["paths"]["/predict"]["post"]["responses"]
+    predict = spec["paths"]["/api/v1/predict"]["post"]["responses"]
     assert {"200", "422", "503"} <= predict.keys()
     assert error_schema_ref(predict["422"]) == ref
     assert error_schema_ref(predict["503"]) == ref
-    batch = spec["paths"]["/predict/batch"]["post"]["responses"]
+    batch = spec["paths"]["/api/v1/predict/batch"]["post"]["responses"]
     assert {"413", "422", "503"} <= batch.keys()
     assert error_schema_ref(batch["413"]) == ref
     assert "HTTPValidationError" not in spec["components"]["schemas"]
@@ -83,7 +83,7 @@ def test_predict_documents_the_notebook_fraud_row(spec):
 
 def test_the_prediction_example_matches_what_the_model_returns(client, spec):
     example = spec["components"]["schemas"]["PredictionOut"]["examples"][0]
-    live = client.post("/predict", json=NOTEBOOK_FRAUD_ROW).json()
+    live = client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW).json()
     assert example["probability"] == pytest.approx(live["probability"], abs=1e-6)
     assert example["features"] == live["features"]
     assert example["signals"] == live["signals"]

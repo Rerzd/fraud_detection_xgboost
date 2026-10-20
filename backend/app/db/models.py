@@ -1,12 +1,17 @@
 """ORM models.
 
-Intentionally light for a local demo: `create_all` on startup, no migrations.
+Intentionally light for a local demo: `create_all` on startup, no migrations. Instead, the schema
+carries a version (`SCHEMA_VERSION`, stored in SQLite's `PRAGMA user_version`). Change a table and
+bump the number in the same commit: a database file written by another version is dropped and
+rebuilt on startup (see `app.db.session`), so the stored history is disposable demo data.
 """
 
 from datetime import UTC, datetime
 
 from sqlalchemy import JSON, DateTime, Float, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+SCHEMA_VERSION = 1
 
 
 class Base(DeclarativeBase):
@@ -27,3 +32,8 @@ class Prediction(Base):
     probability: Mapped[float] = mapped_column(Float)
     risk_level: Mapped[str] = mapped_column(String(10), index=True)
     payload: Mapped[dict] = mapped_column(JSON)
+    # Which model artifact produced the score: the configured label and the pickle's short sha256.
+    model_version: Mapped[str] = mapped_column(String(64))
+    model_hash: Mapped[str] = mapped_column(String(12))
+    # The X-Request-ID of the call that created the row, to find its log lines.
+    request_id: Mapped[str | None] = mapped_column(String(128))

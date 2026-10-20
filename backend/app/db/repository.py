@@ -8,7 +8,16 @@ from sqlalchemy.orm import Session
 from app.db.models import Prediction
 
 
-def _to_record(tx: dict, probability: float, risk_level: str, source: str, batch_id: str | None):
+def _to_record(
+    tx: dict,
+    probability: float,
+    risk_level: str,
+    source: str,
+    batch_id: str | None,
+    model_version: str,
+    model_hash: str,
+    request_id: str | None,
+):
     return Prediction(
         source=source,
         batch_id=batch_id,
@@ -17,18 +26,43 @@ def _to_record(tx: dict, probability: float, risk_level: str, source: str, batch
         probability=probability,
         risk_level=risk_level,
         payload=tx,
+        model_version=model_version,
+        model_hash=model_hash,
+        request_id=request_id,
     )
 
 
-def insert(session: Session, tx: dict, probability: float, risk_level: str) -> Prediction:
-    record = _to_record(tx, probability, risk_level, "single", None)
+def insert(
+    session: Session,
+    tx: dict,
+    probability: float,
+    risk_level: str,
+    *,
+    model_version: str,
+    model_hash: str,
+    request_id: str | None = None,
+) -> Prediction:
+    record = _to_record(
+        tx, probability, risk_level, "single", None, model_version, model_hash, request_id
+    )
     session.add(record)
     session.commit()
     return record
 
 
-def bulk_insert(session: Session, rows: list[tuple[dict, float, str]], batch_id: str) -> None:
-    session.add_all(_to_record(tx, p, level, "batch", batch_id) for tx, p, level in rows)
+def bulk_insert(
+    session: Session,
+    rows: list[tuple[dict, float, str]],
+    batch_id: str,
+    *,
+    model_version: str,
+    model_hash: str,
+    request_id: str | None = None,
+) -> None:
+    session.add_all(
+        _to_record(tx, p, level, "batch", batch_id, model_version, model_hash, request_id)
+        for tx, p, level in rows
+    )
     session.commit()
 
 

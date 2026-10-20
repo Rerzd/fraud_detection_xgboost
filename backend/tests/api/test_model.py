@@ -1,5 +1,5 @@
 def test_model_info(client):
-    card = client.get("/model/info").json()
+    card = client.get("/api/v1/model/info").json()
     assert card["metrics"]["auprc"] == 0.9926
     assert card["algorithm"]["hyperparameters"]["max_depth"] == 3
     assert card["thresholds"] == {**card["thresholds"], "review": 0.2, "fraud": 0.5}

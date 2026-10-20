@@ -15,3 +15,8 @@ def test_file_sha256_hashes_in_chunks(tmp_path):
     f = tmp_path / "blob.bin"
     f.write_bytes(data)
     assert file_sha256(f) == hashlib.sha256(data).hexdigest()
+
+
+def test_short_hash_is_the_first_twelve_characters(model):
+    assert model.short_hash == model.sha256[:12]
+    assert len(model.short_hash) == 12

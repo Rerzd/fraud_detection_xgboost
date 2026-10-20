@@ -26,6 +26,8 @@ def build_model_card(model: FraudModel, settings: Settings) -> dict:
     return {
         "name": "PaySim fraud classifier",
         "version": model.version,
+        "sha256": model.sha256,
+        "model_hash": model.short_hash,
         "algorithm": {
             "estimator": type(clf).__name__,
             "objective": params["objective"],

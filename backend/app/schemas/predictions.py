@@ -18,6 +18,9 @@ class HistoryItem(BaseModel):
     probability: float
     risk_level: RiskLevel
     payload: dict
+    model_version: str
+    model_hash: str
+    request_id: str | None
 
     model_config = {"from_attributes": True}
 

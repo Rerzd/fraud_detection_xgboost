@@ -33,6 +33,8 @@ class BatchLimits(BaseModel):
 
 class BatchOut(BaseModel):
     batch_id: str
+    model_version: str = Field(description="Configured label of the model that scored this file")
+    model_hash: str = Field(description="First 12 hex characters of the model file's sha256")
     summary: BatchSummary
     rows: list[BatchRow]
     errors: list[BatchRowError]
