@@ -3,6 +3,7 @@
 from pydantic import BaseModel, Field
 
 from app.schemas.common import RiskLevel, Source, TransactionType, UtcDatetime
+from app.schemas.review import ReviewStats, ReviewStatus
 
 
 class PredictionRecord(BaseModel):
@@ -20,6 +21,12 @@ class PredictionRecord(BaseModel):
     model_version: str
     model_hash: str
     request_id: str | None = Field(description="`X-Request-ID` of the call that stored it")
+    review_status: ReviewStatus = Field(
+        description="`pending` for high and review predictions until an analyst decides; "
+        "`legitimate` for low ones"
+    )
+    review_note: str | None
+    reviewed_at: UtcDatetime | None = Field(description="When an analyst last reviewed it, in UTC")
 
     model_config = {"from_attributes": True}
 
@@ -28,3 +35,4 @@ class StatsOut(BaseModel):
     total: int
     by_risk: dict[RiskLevel, int]
     by_source: dict[Source, int]
+    review: ReviewStats

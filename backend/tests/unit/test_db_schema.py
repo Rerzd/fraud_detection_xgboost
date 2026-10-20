@@ -2,8 +2,9 @@ import pytest
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 
-from app.db.models import Batch, Prediction
+from app.db.models import Batch
 from app.db.session import init_db
+from conftest import make_prediction
 
 
 @pytest.fixture
@@ -19,23 +20,15 @@ def indexed_columns(engine, table: str) -> set[str]:
 
 def test_the_columns_the_log_is_filtered_and_sorted_by_are_indexed(db):
     engine, _ = db
-    assert {"created_at", "risk_level", "batch_id"} <= indexed_columns(engine, "predictions")
+    assert {"created_at", "risk_level", "batch_id", "review_status"} <= indexed_columns(
+        engine, "predictions"
+    )
     assert "created_at" in indexed_columns(engine, "batches")
 
 
 def test_a_prediction_cannot_point_at_a_batch_that_does_not_exist(db):
     _, Session = db
-    orphan = Prediction(
-        source="batch",
-        batch_id="f" * 32,
-        type="TRANSFER",
-        amount=1.0,
-        probability=0.1,
-        risk_level="low",
-        payload={},
-        model_version="v",
-        model_hash="abc",
-    )
+    orphan = make_prediction(source="batch", batch_id="f" * 32)
     with Session() as session, pytest.raises(IntegrityError):
         session.add(orphan)
         session.commit()
@@ -56,17 +49,5 @@ def test_a_prediction_can_point_at_an_existing_batch(db):
                 model_hash="abc",
             )
         )
-        session.add(
-            Prediction(
-                source="batch",
-                batch_id="a" * 32,
-                type="TRANSFER",
-                amount=1.0,
-                probability=0.1,
-                risk_level="low",
-                payload={},
-                model_version="v",
-                model_hash="abc",
-            )
-        )
+        session.add(make_prediction(source="batch", batch_id="a" * 32))
         session.commit()

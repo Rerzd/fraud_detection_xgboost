@@ -106,7 +106,15 @@ def test_listings_are_documented_as_pages(spec):
 def test_the_prediction_filters_are_documented(spec):
     params = {p["name"]: p for p in spec["paths"]["/api/v1/predictions"]["get"]["parameters"]}
     assert set(params) == {
-        "limit", "offset", "risk_level", "source", "batch_id", "created_from", "created_to"
+        "limit",
+        "offset",
+        "risk_level",
+        "source",
+        "batch_id",
+        "review_status",
+        "created_from",
+        "created_to",
+        "sort",
     }
     assert params["limit"]["schema"]["maximum"] == 200
     assert all(p.get("description") for p in params.values())

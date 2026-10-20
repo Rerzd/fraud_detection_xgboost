@@ -2,12 +2,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from app.db.models import Prediction
 from conftest import (
     CSV_3_VALID_1_INVALID,
     NOTEBOOK_FRAUD_ROW,
     assert_envelope,
     csv_of,
+    make_prediction,
     upload,
 )
 
@@ -17,21 +17,8 @@ T0 = datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
 def seed(client, **overrides) -> int:
     """Store a prediction directly, with a chosen `created_at`, and return its id."""
-    fields = {
-        "created_at": T0,
-        "source": "single",
-        "batch_id": None,
-        "type": "TRANSFER",
-        "amount": 10.0,
-        "probability": 0.9,
-        "risk_level": "high",
-        "payload": {},
-        "model_version": "xgb-paysim-v1",
-        "model_hash": "cbf91feebec3",
-        "request_id": None,
-    }
     with client.app.state.sessionmaker() as session:
-        record = Prediction(**{**fields, **overrides})
+        record = make_prediction(**overrides)
         session.add(record)
         session.commit()
         return record.id
@@ -194,7 +181,7 @@ def test_stats_are_correct(client):
     client.post("/api/v1/predict", json=NOTEBOOK_FRAUD_ROW)
     upload(client, CSV_3_VALID_1_INVALID)
     stats = client.get(f"{URL}/stats").json()
-    assert stats == {
+    assert {k: stats[k] for k in ("total", "by_risk", "by_source")} == {
         "total": 4,
         "by_risk": {"low": 1, "review": 1, "high": 2},
         "by_source": {"single": 1, "batch": 3},

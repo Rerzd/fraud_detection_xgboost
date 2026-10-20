@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class Base(DeclarativeBase):
@@ -55,3 +55,8 @@ class Prediction(Base):
     model_hash: Mapped[str] = mapped_column(String(12))
     # The X-Request-ID of the call that created the row, to find its log lines.
     request_id: Mapped[str | None] = mapped_column(String(128))
+    # Analyst workflow: "pending" for high and review predictions, "legitimate" for low ones, until
+    # an analyst decides. `reviewed_at` is set only by an analyst, so it tells who has been looked at.
+    review_status: Mapped[str] = mapped_column(String(20), index=True)
+    review_note: Mapped[str | None] = mapped_column(String(500))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

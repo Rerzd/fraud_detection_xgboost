@@ -27,6 +27,11 @@ answering).
 (the first 12 characters of the sha256 of the model file) and is stored with both, so a score can
 always be tied to the exact artifact that produced it.
 
+**Review.** Predictions the model flags (`high`, `review`) start as `pending`; low ones are taken as
+`legitimate`. An analyst records a verdict with `PATCH /predictions/{id}/review`, and
+`/predictions/stats` reports the precision observed on those verdicts. That number describes this
+demo data only; it is not a model metric.
+
 **Errors.** Every error, whatever its status, has the same body:
 `{"error": {"code", "message", "details", "request_id"}}`. The `request_id` is also returned in the
 `X-Request-ID` header (send your own to trace a call), next to `X-Process-Time-Ms`.
@@ -50,7 +55,8 @@ TAGS = [
     },
     {
         "name": "predictions",
-        "description": "The prediction log: every stored score, paginated, with filters and statistics.",
+        "description": "The prediction log: every stored score, paginated, with filters, statistics and "
+        "the analyst review of each one.",
     },
     {"name": "model", "description": "The model card: training setup, metrics, thresholds and limits."},
 ]

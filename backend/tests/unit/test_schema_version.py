@@ -8,25 +8,12 @@ from app.core.config import Settings
 from app.db.models import SCHEMA_VERSION, Prediction
 from app.db.session import ensure_schema, init_db
 from app.main import create_app
+from conftest import make_prediction
 
 
 def user_version(engine) -> int:
     with engine.connect() as conn:
         return conn.exec_driver_sql("PRAGMA user_version").scalar_one()
-
-
-def one_prediction(**overrides) -> Prediction:
-    fields = {
-        "source": "single",
-        "type": "TRANSFER",
-        "amount": 10.0,
-        "probability": 0.5,
-        "risk_level": "high",
-        "payload": {},
-        "model_version": "v",
-        "model_hash": "abc",
-    }
-    return Prediction(**{**fields, **overrides})
 
 
 @pytest.fixture
@@ -66,7 +53,7 @@ def test_a_new_database_is_stamped_with_the_current_version(open_db, caplog):
 def test_a_database_at_the_current_version_keeps_its_rows(open_db):
     engine, Session = open_db()
     with Session() as session:
-        session.add(one_prediction())
+        session.add(make_prediction())
         session.commit()
     engine.dispose()
 
@@ -79,7 +66,7 @@ def test_a_database_at_the_current_version_keeps_its_rows(open_db):
 def test_an_older_version_is_dropped_and_rebuilt_with_a_warning(open_db, caplog):
     engine, Session = open_db()
     with Session() as session:
-        session.add(one_prediction())
+        session.add(make_prediction())
         session.commit()
     with engine.begin() as conn:
         conn.exec_driver_sql(f"PRAGMA user_version = {SCHEMA_VERSION - 1}")
@@ -111,6 +98,7 @@ def test_a_file_from_before_versioning_is_rebuilt_too(db_file, engines, caplog):
 
     columns = {c["name"] for c in inspect(engine).get_columns("predictions")}
     assert {"model_version", "model_hash", "request_id"} <= columns
+    assert {"review_status", "review_note", "reviewed_at"} <= columns
     assert user_version(engine) == SCHEMA_VERSION
     assert "event=schema_rebuilt" in caplog.records[0].getMessage()
 

@@ -13,6 +13,7 @@ from app.core.errors import (
     ModelUnavailableError,
     NotFoundError,
     NotReadyError,
+    RuleViolationError,
 )
 from app.main import create_app
 from conftest import CSV_3_VALID_1_INVALID, NOTEBOOK_FRAUD_ROW, assert_envelope, upload
@@ -88,6 +89,7 @@ def test_the_incoming_request_id_ends_up_in_the_body(client):
         (NotFoundError, 404, "NOT_FOUND"),
         (ModelUnavailableError, 503, "MODEL_UNAVAILABLE"),
         (NotReadyError, 503, "NOT_READY"),
+        (RuleViolationError, 422, "VALIDATION_ERROR"),
         (BatchTooLargeError, 413, "BATCH_TOO_LARGE"),
         (InvalidCsvError, 422, "INVALID_CSV"),
         (ConflictError, 409, "CONFLICT"),
@@ -129,6 +131,7 @@ def test_app_error_subclasses_cover_the_documented_codes():
         "NOT_FOUND",
         "MODEL_UNAVAILABLE",
         "NOT_READY",
+        "VALIDATION_ERROR",
         "BATCH_TOO_LARGE",
         "INVALID_CSV",
         "CONFLICT",

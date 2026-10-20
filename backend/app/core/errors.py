@@ -53,6 +53,13 @@ class NotReadyError(AppError):
     code = "NOT_READY"
 
 
+class RuleViolationError(AppError):
+    """A well-formed request that breaks a business rule; `details` names the offending field."""
+
+    status_code = 422
+    code = "VALIDATION_ERROR"
+
+
 class BatchTooLargeError(AppError):
     """An uploaded file has more bytes or more rows than the configured limits."""
 

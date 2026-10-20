@@ -9,6 +9,7 @@ from app.ml.model import FraudModel, risk_level
 from app.ml.preprocessing import build_features, features_to_dict
 from app.ml.signals import describe
 from app.schemas.scoring import PredictionOut, TransactionIn
+from app.services import review_service
 
 
 def score_transaction(
@@ -28,6 +29,7 @@ def score_transaction(
         raw,
         probability,
         level,
+        review_status=review_service.initial_status(level),
         model_version=model.version,
         model_hash=model.short_hash,
         request_id=request_id,

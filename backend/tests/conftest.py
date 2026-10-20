@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -5,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
-from app.db.models import Base
+from app.db.models import Base, Prediction
 from app.main import create_app
 from app.ml.model import FraudModel
 from app.schemas.common import ErrorResponse
@@ -32,6 +34,25 @@ CSV_3_VALID_1_INVALID = "\n".join(
         "TRANSFER,350,400000,800000,400000,0,0",
     ]
 )
+
+
+def make_prediction(**overrides) -> Prediction:
+    """A stored-prediction row with plausible defaults, for tests that write to the database."""
+    fields = {
+        "created_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
+        "source": "single",
+        "batch_id": None,
+        "type": "TRANSFER",
+        "amount": 10.0,
+        "probability": 0.9,
+        "risk_level": "high",
+        "payload": {},
+        "model_version": "xgb-paysim-v1",
+        "model_hash": "cbf91feebec3",
+        "request_id": None,
+        "review_status": "pending",
+    }
+    return Prediction(**{**fields, **overrides})
 
 
 def csv_of(valid_rows: int) -> str:

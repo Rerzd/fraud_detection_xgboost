@@ -15,6 +15,7 @@ from app.ml.model import FraudModel, risk_level
 from app.ml.preprocessing import build_features
 from app.schemas.batches import BatchOut
 from app.schemas.scoring import TransactionIn
+from app.services import review_service
 
 REQUIRED_COLUMNS = list(TransactionIn.model_fields)
 
@@ -101,7 +102,12 @@ def score_batch(
         invalid=len(errors),
         flagged=risk_counts["high"],
         rows=[
-            ({k: r[k] for k in TransactionIn.model_fields}, r["probability"], r["risk_level"])
+            (
+                {k: r[k] for k in TransactionIn.model_fields},
+                r["probability"],
+                r["risk_level"],
+                review_service.initial_status(r["risk_level"]),
+            )
             for r in rows
         ],
         model_version=model.version,
