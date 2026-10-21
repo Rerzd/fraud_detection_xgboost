@@ -7,4 +7,4 @@ __pycache__/
 *.ipynb
 .ipynb_checkpoints/
 requirements-dev.txt
-pytest.ini
+pyproject.toml

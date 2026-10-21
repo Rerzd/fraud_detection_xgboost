@@ -1,16 +1,19 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The React 19, Vite and Tailwind CSS console for the fraud detection API.
 
-Currently, two official plugins are available:
+This folder has no documentation of its own. The [project README](../README.md) covers the
+quickstart, the five pages of the console (with screenshots), the API it talks to and the
+configuration, including the one build-time variable, `VITE_API_URL`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+From the repository root:
 
-## React Compiler
+| Command | What it does |
+|---|---|
+| `npm run dev` | Backend and this app together, on `localhost:8000` and `localhost:5173` |
+| `npm run dev:web` | Only this app |
+| `npm run test:web` | The Vitest suite |
+| `npm run lint` | ESLint |
+| `npm run build` | Production build into `frontend/dist` |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`src/api.js` is the only module that calls the backend; everything else goes through it.
