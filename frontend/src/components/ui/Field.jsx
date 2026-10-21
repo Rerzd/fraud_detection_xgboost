@@ -1,11 +1,21 @@
 const BASE =
-  'h-8 w-full rounded border bg-surface px-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:border-brand-700'
+  'w-full rounded border bg-surface px-2.5 text-[13px] text-ink placeholder:text-ink-faint focus:border-brand-700'
 
 export function Input({ invalid = false, className = '', ...props }) {
   return (
     <input
       aria-invalid={invalid || undefined}
-      className={`${BASE} ${invalid ? 'border-risk-high' : 'border-line-input'} ${className}`}
+      className={`${BASE} h-8 ${invalid ? 'border-risk-high' : 'border-line-input'} ${className}`}
+      {...props}
+    />
+  )
+}
+
+export function Textarea({ invalid = false, className = '', ...props }) {
+  return (
+    <textarea
+      aria-invalid={invalid || undefined}
+      className={`${BASE} min-h-[4.5rem] resize-y py-1.5 ${invalid ? 'border-risk-high' : 'border-line-input'} ${className}`}
       {...props}
     />
   )
@@ -15,7 +25,7 @@ export function Select({ invalid = false, className = '', children, ...props }) 
   return (
     <select
       aria-invalid={invalid || undefined}
-      className={`${BASE} ${invalid ? 'border-risk-high' : 'border-line-input'} ${className}`}
+      className={`${BASE} h-8 ${invalid ? 'border-risk-high' : 'border-line-input'} ${className}`}
       {...props}
     >
       {children}

@@ -52,6 +52,7 @@ const paths = {
       <circle cx="12" cy="12" r="2.75" />
     </>
   ),
+  inbox: <path d="M4 13.5 6.5 5.5h11l2.5 8M4 13.5V18a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 18v-4.5M4 13.5h4.5l1 2h5l1-2H20" />,
   play: <path d="M8 5.5v13l10.5-6.5L8 5.5Z" />,
   'chevron-right': <path d="m9.5 5.5 6.5 6.5-6.5 6.5" />,
   'chevron-down': <path d="m5.5 9.5 6.5 6.5 6.5-6.5" />,
