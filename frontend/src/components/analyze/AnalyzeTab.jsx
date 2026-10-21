@@ -6,7 +6,7 @@ import { Page } from '../shell/PageHeader'
 import ResultPanel from './ResultPanel'
 import TestCaseForm from './TestCaseForm'
 
-export default function AnalyzeTab({ thresholds, online }) {
+export default function AnalyzeTab({ thresholds, online, onScored = () => {} }) {
   const [values, setValues] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState(false)
@@ -54,6 +54,7 @@ export default function AnalyzeTab({ thresholds, online }) {
       const result = await predict(transaction)
       const at = new Date()
       setRun({ result, request: transaction, caseId: caseId(at), at })
+      onScored()
     } catch (err) {
       setApiError(err.message)
     } finally {

@@ -23,6 +23,13 @@ export const PAGES = [
     description: 'Every prediction stored by the API, newest first.',
   },
   {
+    id: 'review',
+    group: 'Records',
+    label: 'Review queue',
+    icon: 'inbox',
+    description: 'Flagged predictions waiting for an analyst, highest score first.',
+  },
+  {
     id: 'model',
     group: 'Model',
     label: 'Model card',

@@ -14,6 +14,12 @@ const item = (id, overrides = {}) => ({
   probability: 0.99999988,
   risk_level: 'high',
   payload: { type: 'TRANSFER', step: 459, amount: 1153156 },
+  model_version: 'xgb-paysim-v1',
+  model_hash: 'cbf91feebec3',
+  request_id: 'req-123',
+  review_status: 'pending',
+  review_note: null,
+  reviewed_at: null,
   ...overrides,
 })
 
@@ -33,7 +39,38 @@ describe('HistoryTable', () => {
       'Amount',
       'Probability',
       'Decision',
+      'Review',
     ])
+  })
+
+  it('shows the review status of every record as a labelled badge', () => {
+    const html = render([
+      item(1),
+      item(2, { review_status: 'confirmed_fraud', reviewed_at: '2026-10-17T05:00:00' }),
+      item(3, { risk_level: 'low', review_status: 'legitimate' }),
+      item(4, { review_status: 'false_positive', reviewed_at: '2026-10-17T05:00:00' }),
+    ])
+    for (const label of ['Pending', 'Confirmed fraud', 'Legitimate', 'False positive']) {
+      expect(html).toContain(`>${label}</span>`)
+    }
+  })
+
+  it('offers one-click verdicts instead of the status in the review queue', () => {
+    const html = renderToStaticMarkup(<HistoryTable items={[item(7), item(8)]} quickReview />)
+    expect(html).toContain('Quick review')
+    for (const label of ['Confirm fraud', 'False positive', 'Legitimate']) {
+      expect(html).toContain(`aria-label="${label} for record 7"`)
+      expect(html).toContain(`aria-label="${label} for record 8"`)
+    }
+    expect(html).not.toContain('>Pending</span>')
+  })
+
+  it('leaves Source and Batch ID out of the review queue so the verdict buttons fit', () => {
+    const html = renderToStaticMarkup(<HistoryTable items={[item(1)]} quickReview />)
+    const headers = [...html.matchAll(/<th[^>]*>(.*?)<\/th>/g)].map((m) => m[1].replace(/<[^>]+>/g, ''))
+    expect(headers).toEqual(['Details', 'ID', 'Timestamp', 'Type', 'Amount', 'Probability', 'Decision', 'Quick review'])
+    // Every row has one cell per header.
+    expect([...html.matchAll(/<td/g)]).toHaveLength(headers.length)
   })
 
   it('shows a short batch id with the full id as a tooltip, and a dash for single predictions', () => {

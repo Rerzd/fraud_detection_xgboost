@@ -4,12 +4,15 @@ import { Table, Td, Th, Tr } from '../ui/DataTable'
 import Icon from '../ui/Icon'
 import RiskBadge from '../ui/RiskBadge'
 import Tag from '../ui/Tag'
+import QuickReview from './QuickReview'
 import RecordDetail from './RecordDetail'
+import ReviewBadge from './ReviewBadge'
 
-const COLUMNS = 9
+const COLUMNS = 10
+const QUEUE_COLUMNS = 8 // the review queue leaves out Source and Batch ID
 
 /** One record: a summary row and, when open, a detail row. Each record is its own tbody. */
-function LogRow({ item, index, open, onToggle }) {
+function LogRow({ item, index, open, onToggle, onUpdate, quickReview }) {
   const detailId = `record-${item.id}`
   return (
     <tbody>
@@ -23,7 +26,7 @@ function LogRow({ item, index, open, onToggle }) {
             type="button"
             aria-expanded={open}
             aria-controls={open ? detailId : undefined}
-            aria-label={`${open ? 'Hide' : 'Show'} stored payload for record ${item.id}`}
+            aria-label={`${open ? 'Hide' : 'Show'} stored payload and review for record ${item.id}`}
             className="grid size-6 place-items-center rounded-sm text-ink-muted hover:bg-line"
           >
             <Icon name={open ? 'chevron-down' : 'chevron-right'} className="size-4" />
@@ -35,12 +38,16 @@ function LogRow({ item, index, open, onToggle }) {
         <Td mono className="whitespace-nowrap" title={`${formatUtc(item.created_at)} UTC`}>
           {formatTimestamp(item.created_at)}
         </Td>
-        <Td>
-          <Tag tone={item.source === 'batch' ? 'brand' : 'neutral'}>{item.source}</Tag>
-        </Td>
-        <Td mono className="text-ink-muted" title={item.batch_id ?? undefined}>
-          {item.batch_id ? item.batch_id.slice(0, 8) : '-'}
-        </Td>
+        {!quickReview && (
+          <>
+            <Td>
+              <Tag tone={item.source === 'batch' ? 'brand' : 'neutral'}>{item.source}</Tag>
+            </Td>
+            <Td mono className="text-ink-muted" title={item.batch_id ?? undefined}>
+              {item.batch_id ? item.batch_id.slice(0, 8) : '-'}
+            </Td>
+          </>
+        )}
         <Td mono className="text-ink-muted">
           {item.type}
         </Td>
@@ -49,13 +56,23 @@ function LogRow({ item, index, open, onToggle }) {
         <Td>
           <RiskBadge level={item.risk_level} />
         </Td>
+        {quickReview ? (
+          // Buttons in this cell must not also open or close the row.
+          <Td onClick={(event) => event.stopPropagation()}>
+            <QuickReview item={item} onReviewed={onUpdate} />
+          </Td>
+        ) : (
+          <Td>
+            <ReviewBadge status={item.review_status} />
+          </Td>
+        )}
       </Tr>
       {open && (
         <tr id={detailId} className="bg-surface">
-          <td colSpan={COLUMNS} className="border-b border-line-strong p-0">
+          <td colSpan={quickReview ? QUEUE_COLUMNS : COLUMNS} className="border-b border-line-strong p-0">
             {/* Sticky and as wide as the visible area, so the detail stays readable when the table scrolls sideways. */}
             <div className="sticky left-0 w-[calc(100vw-2.25rem)] px-3 py-3 md:w-[calc(100vw-220px-3.25rem)] min-[1120px]:w-full">
-              <RecordDetail item={item} />
+              <RecordDetail item={item} onUpdate={onUpdate} />
             </div>
           </td>
         </tr>
@@ -64,8 +81,14 @@ function LogRow({ item, index, open, onToggle }) {
   )
 }
 
-/** Audit log table. Click a row (or its chevron) to expand the stored payload inline. */
-export default function HistoryTable({ items }) {
+/**
+ * Audit log table. Click a row (or its chevron) to expand the stored payload, the model that
+ * scored it and the analyst review. With `quickReview` the last column holds one-click verdicts
+ * (the review queue, which also drops the Source and Batch ID columns; both are in the expanded row);
+ * otherwise it shows the review status. `onUpdate(record)` receives every
+ * review that is saved.
+ */
+export default function HistoryTable({ items, onUpdate = () => {}, quickReview = false }) {
   const [open, setOpen] = useState(() => new Set())
 
   function toggle(id) {
@@ -77,7 +100,7 @@ export default function HistoryTable({ items }) {
   }
 
   return (
-    <Table minWidth="52rem" maxHeight="min(36rem, 70vh)">
+    <Table minWidth={quickReview ? '54rem' : '58rem'} maxHeight="min(36rem, 70vh)">
       <thead>
         <tr>
           <Th className="w-8">
@@ -85,16 +108,29 @@ export default function HistoryTable({ items }) {
           </Th>
           <Th>ID</Th>
           <Th>Timestamp</Th>
-          <Th>Source</Th>
-          <Th>Batch ID</Th>
+          {!quickReview && (
+            <>
+              <Th>Source</Th>
+              <Th>Batch ID</Th>
+            </>
+          )}
           <Th>Type</Th>
           <Th align="right">Amount</Th>
           <Th align="right">Probability</Th>
           <Th>Decision</Th>
+          <Th>{quickReview ? 'Quick review' : 'Review'}</Th>
         </tr>
       </thead>
       {items.map((item, index) => (
-        <LogRow key={item.id} item={item} index={index} open={open.has(item.id)} onToggle={() => toggle(item.id)} />
+        <LogRow
+          key={item.id}
+          item={item}
+          index={index}
+          open={open.has(item.id)}
+          onToggle={() => toggle(item.id)}
+          onUpdate={onUpdate}
+          quickReview={quickReview}
+        />
       ))}
     </Table>
   )

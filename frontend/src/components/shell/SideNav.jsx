@@ -1,8 +1,27 @@
 import { PAGE_GROUPS, PAGES } from '../../pages'
 import Icon from '../ui/Icon'
 
-/** Grouped navigation for md and up. The page is the URL hash, so these are plain links. */
-export function SideNav({ active }) {
+/** Count pill for a page, such as the review queue length. Nothing is drawn for zero. */
+function Badge({ count }) {
+  if (!count) return null
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="ml-auto rounded-xs border border-risk-review-line bg-risk-review-bg px-1.5 font-mono text-[11px] font-semibold text-risk-review"
+      >
+        {count}
+      </span>
+      <span className="sr-only">({count} pending)</span>
+    </>
+  )
+}
+
+/**
+ * Grouped navigation for md and up. The page is the URL hash, so these are plain links.
+ * `badges` maps a page id to a count shown next to its label.
+ */
+export function SideNav({ active, badges = {} }) {
   return (
     <nav aria-label="Main" className="sticky top-12 py-2">
       {PAGE_GROUPS.map((group) => (
@@ -23,6 +42,7 @@ export function SideNav({ active }) {
               >
                 <Icon name={page.icon} className={`size-4 ${current ? 'text-brand-700' : ''}`} />
                 {page.label}
+                <Badge count={badges[page.id]} />
               </a>
             )
           })}
@@ -33,7 +53,7 @@ export function SideNav({ active }) {
 }
 
 /** Horizontal, scrollable version of the navigation for narrow screens. */
-export function MobileNav({ active }) {
+export function MobileNav({ active, badges = {} }) {
   return (
     <nav
       aria-label="Main"
@@ -54,6 +74,7 @@ export function MobileNav({ active }) {
           >
             <Icon name={page.icon} className={`hidden size-4 sm:block ${current ? 'text-brand-700' : ''}`} />
             {page.label}
+            <Badge count={badges[page.id]} />
           </a>
         )
       })}

@@ -4,12 +4,14 @@ import AnalyzeTab from './components/analyze/AnalyzeTab'
 import BatchTab from './components/batch/BatchTab'
 import HistoryTab from './components/history/HistoryTab'
 import ModelTab from './components/model/ModelTab'
+import ReviewQueueTab from './components/review/ReviewQueueTab'
 import AppHeader from './components/shell/AppHeader'
 import OfflineBanner from './components/shell/OfflineBanner'
 import { MobileNav, SideNav } from './components/shell/SideNav'
 import StatusBar from './components/shell/StatusBar'
 import useHealth from './hooks/useHealth'
 import useModelInfo from './hooks/useModelInfo'
+import useStats from './hooks/useStats'
 import { pageById, pageFromHash } from './pages'
 
 export default function App() {
@@ -17,6 +19,7 @@ export default function App() {
   const [page, setPage] = useState(() => pageFromHash(window.location.hash))
   const online = status === 'online'
   const { info: modelInfo, error: modelError } = useModelInfo(online)
+  const { stats, refresh: refreshStats } = useStats(online)
   const mainRef = useRef(null)
 
   useEffect(() => {
@@ -28,6 +31,13 @@ export default function App() {
   useEffect(() => {
     document.title = `${pageById(page).label} · Fraud Risk Test Bench`
   }, [page])
+
+  // Scoring on one page adds to the review queue shown on another: look again when the page changes.
+  useEffect(() => {
+    if (online) refreshStats()
+  }, [page, online, refreshStats])
+
+  const badges = { review: stats?.review.pending }
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -44,26 +54,28 @@ export default function App() {
       </a>
       <AppHeader status={status} modelVersion={modelVersion} />
       {status === 'offline' && <OfflineBanner onRetry={refresh} />}
-      <MobileNav active={page} />
+      <MobileNav active={page} badges={badges} />
       <div className="flex flex-1">
         <aside className="hidden w-[220px] shrink-0 border-r border-line-strong bg-surface md:block">
-          <SideNav active={page} />
+          <SideNav active={page} badges={badges} />
         </aside>
         <main id="main" ref={mainRef} tabIndex={-1} className="min-w-0 flex-1 px-4 py-4 focus:outline-none md:px-6 md:py-5">
           <div className="mx-auto max-w-[1320px]">
             {page === 'analyze' ? (
-              <AnalyzeTab thresholds={modelInfo?.thresholds} online={online} />
+              <AnalyzeTab thresholds={modelInfo?.thresholds} online={online} onScored={refreshStats} />
             ) : page === 'batch' ? (
-              <BatchTab online={online} />
+              <BatchTab online={online} onChange={refreshStats} />
             ) : page === 'history' ? (
-              <HistoryTab online={online} />
+              <HistoryTab online={online} stats={stats} onChange={refreshStats} />
+            ) : page === 'review' ? (
+              <ReviewQueueTab online={online} stats={stats} onChange={refreshStats} />
             ) : (
               <ModelTab info={modelInfo} error={modelError} online={online} />
             )}
           </div>
         </main>
       </div>
-      <StatusBar apiUrl={API_URL} status={status} thresholds={modelInfo?.thresholds} />
+      <StatusBar apiUrl={API_URL} status={status} thresholds={modelInfo?.thresholds} stats={stats} />
     </div>
   )
 }
