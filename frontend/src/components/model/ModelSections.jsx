@@ -23,6 +23,11 @@ export function Overview({ info }) {
         {mono(algorithm.estimator)} with the {mono(algorithm.objective)} objective, trained on {data.dataset}.
       </p>
       <p>Scope: {data.filter}.</p>
+      {info.sha256 && (
+        <p>
+          Artifact sha256: <span className="font-mono break-all text-ink">{info.sha256}</span>
+        </p>
+      )}
     </div>
   )
 }

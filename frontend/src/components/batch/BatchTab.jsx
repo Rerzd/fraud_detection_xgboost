@@ -9,14 +9,19 @@ import Icon from '../ui/Icon'
 import Panel from '../ui/Panel'
 import BatchResults from './BatchResults'
 import Dropzone from './Dropzone'
+import PreviousRuns from './PreviousRuns'
+import StoredRun from './StoredRun'
 
-export default function BatchTab({ online }) {
+export default function BatchTab({ online, onChange = () => {} }) {
   const [limits, setLimits] = useState(null)
   const [fileName, setFileName] = useState(null)
   // The results keep the name of the file they came from while the next file is still scoring.
   const [run, setRun] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  // Bumped after each upload so the list of previous runs picks the new one up.
+  const [runsKey, setRunsKey] = useState(0)
+  const [viewing, setViewing] = useState(null)
 
   useEffect(() => {
     if (!online) return
@@ -37,6 +42,8 @@ export default function BatchTab({ online }) {
     setError(null)
     try {
       setRun({ result: await predictBatch(file), fileName: file.name })
+      setRunsKey((n) => n + 1)
+      onChange()
     } catch (err) {
       setError(err.message)
       setRun(null)
@@ -86,6 +93,9 @@ export default function BatchTab({ online }) {
           </EmptyState>
         </Panel>
       )}
+
+      {online && <PreviousRuns online={online} reloadKey={runsKey} selectedId={viewing?.id} onSelect={setViewing} />}
+      {viewing && <StoredRun key={viewing.id} batch={viewing} onClose={() => setViewing(null)} onChange={onChange} />}
     </Page>
   )
 }
