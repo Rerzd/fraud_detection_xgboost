@@ -49,13 +49,28 @@ export function predictBatch(file) {
 
 /**
  * One page of the audit log: `{ items, total, limit, offset }`. `filters` uses the API's own query
- * names (risk_level, source, batch_id, created_from, created_to); empty values are left out.
+ * names (risk_level, source, batch_id, review_status, created_from, created_to, sort); empty values
+ * are left out.
  */
 export function getHistory({ limit = 50, offset = 0, filters = {} } = {}) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
   for (const [name, value] of Object.entries(filters)) if (value) params.set(name, value)
   return request(`/predictions?${params}`)
 }
+
+export const getPrediction = (id) => request(`/predictions/${id}`)
+
+/** Record an analyst's verdict. A blank note is sent as null; the API trims and validates it. */
+export const reviewPrediction = (id, { status, note }) =>
+  request(`/predictions/${id}/review`, json('PATCH', { status, note: note?.trim() ? note : null }))
+
+/** One page of previous batch runs, newest first: `{ items, total, limit, offset }`. */
+export function getBatches({ limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  return request(`/batches?${params}`)
+}
+
+export const getBatch = (id) => request(`/batches/${id}`)
 
 export const getStats = () => request('/predictions/stats')
 export const clearHistory = () => request('/predictions', { method: 'DELETE' })

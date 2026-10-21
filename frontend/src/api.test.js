@@ -1,5 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { API_BASE, API_BASE_PATH, ApiError, getHistory, request } from './api'
+import {
+  API_BASE,
+  API_BASE_PATH,
+  ApiError,
+  getBatch,
+  getBatches,
+  getHistory,
+  getPrediction,
+  request,
+  reviewPrediction,
+} from './api'
 
 function stubFetch(response) {
   vi.stubGlobal('fetch', vi.fn(response))
@@ -78,5 +88,58 @@ describe('getHistory', () => {
       offset: '50',
       risk_level: 'high',
     })
+  })
+})
+
+describe('review and batch calls', () => {
+  const lastCall = () => {
+    const [url, options] = fetch.mock.calls.at(-1)
+    return { url: new URL(url), options }
+  }
+
+  it('sends a verdict as a PATCH with a JSON body', async () => {
+    stubFetch(() => jsonResponse(200, { id: 7, review_status: 'confirmed_fraud' }))
+    const record = await reviewPrediction(7, { status: 'confirmed_fraud', note: 'Customer called.' })
+    expect(record.review_status).toBe('confirmed_fraud')
+    const { url, options } = lastCall()
+    expect(url.pathname).toBe('/api/v1/predictions/7/review')
+    expect(options.method).toBe('PATCH')
+    expect(options.headers['Content-Type']).toBe('application/json')
+    expect(JSON.parse(options.body)).toEqual({ status: 'confirmed_fraud', note: 'Customer called.' })
+  })
+
+  it('sends a blank or missing note as null', async () => {
+    stubFetch(() => jsonResponse(200, {}))
+    await reviewPrediction(1, { status: 'legitimate', note: '   ' })
+    expect(JSON.parse(lastCall().options.body).note).toBeNull()
+    await reviewPrediction(1, { status: 'legitimate' })
+    expect(JSON.parse(lastCall().options.body).note).toBeNull()
+  })
+
+  it('surfaces the API rule that rejected a review', async () => {
+    stubFetch(() =>
+      jsonResponse(422, {
+        error: { code: 'VALIDATION_ERROR', message: 'note: A note is required to confirm fraud on a low-risk prediction.' },
+      }),
+    )
+    const error = await reviewPrediction(3, { status: 'confirmed_fraud' }).catch((e) => e)
+    expect(error.status).toBe(422)
+    expect(error.message).toContain('A note is required')
+  })
+
+  it('asks for a page of batches', async () => {
+    stubFetch(() => jsonResponse(200, { items: [], total: 0, limit: 10, offset: 20 }))
+    await getBatches({ offset: 20 })
+    const { url } = lastCall()
+    expect(url.pathname).toBe('/api/v1/batches')
+    expect(Object.fromEntries(url.searchParams)).toEqual({ limit: '10', offset: '20' })
+  })
+
+  it('reads one prediction and one batch by id', async () => {
+    stubFetch(() => jsonResponse(200, {}))
+    await getPrediction(42)
+    expect(lastCall().url.pathname).toBe('/api/v1/predictions/42')
+    await getBatch('abc123')
+    expect(lastCall().url.pathname).toBe('/api/v1/batches/abc123')
   })
 })
